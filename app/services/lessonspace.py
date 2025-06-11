@@ -37,8 +37,8 @@ class LessonspaceService:
                         "id": first_teacher.email,
                         "name": first_teacher.name,
                         "role": "teacher",
-                        "leader": True
-                    }
+                        "leader": True,
+                    },
                 },
             )
             response.raise_for_status()
@@ -55,8 +55,8 @@ class LessonspaceService:
                             "id": teacher.email,
                             "name": teacher.name,
                             "role": "teacher",
-                            "leader": False
-                        }
+                            "leader": False,
+                        },
                     },
                 )
 
@@ -71,8 +71,8 @@ class LessonspaceService:
                             "id": student.email,
                             "name": student.name,
                             "role": "student",
-                            "leader": False
-                        }
+                            "leader": False,
+                        },
                     },
                 )
 
