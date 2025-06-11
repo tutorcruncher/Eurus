@@ -2,6 +2,7 @@ import pytest
 import json
 from fastapi.testclient import TestClient
 from app.main import app
+from httpx import HTTPStatusError
 
 
 @pytest.fixture
@@ -16,10 +17,6 @@ def test_health_check(client):
 
 
 def test_create_space(client, monkeypatch):
-    # Mock Redis get to return None (no cached space)
-    monkeypatch.setattr("app.services.lessonspace.redis_client.get", lambda x: None)
-
-    # Mock httpx.AsyncClient.post
     async def mock_post(self, url, *args, **kwargs):
         class MockResponse:
             def raise_for_status(self):
@@ -37,12 +34,6 @@ def test_create_space(client, monkeypatch):
         return MockResponse()
 
     monkeypatch.setattr("httpx.AsyncClient.post", mock_post)
-
-    # Mock Redis setex
-    monkeypatch.setattr(
-        "app.services.lessonspace.redis_client.setex", lambda *args: None
-    )
-
     response = client.post(
         "/api/space",
         json={
@@ -65,21 +56,16 @@ def test_create_space(client, monkeypatch):
             ],
         },
     )
-
     assert response.status_code == 200
     data = response.json()
     assert data["space_id"] == "test-room-id"
     assert data["lesson_id"] == "test-lesson"
     assert len(data["tutor_spaces"]) == 2
     assert len(data["student_spaces"]) == 2
-
-    # Verify tutor spaces
     tutor1 = next(t for t in data["tutor_spaces"] if t["email"] == "tutor1@example.com")
     assert tutor1["name"] == "Test Tutor 1"
     assert tutor1["role"] == "tutor"
     assert tutor1["space_url"] == "https://go.room.sh/test-space"
-
-    # Verify student spaces
     student1 = next(
         s for s in data["student_spaces"] if s["email"] == "student1@example.com"
     )
@@ -88,52 +74,250 @@ def test_create_space(client, monkeypatch):
     assert student1["space_url"] == "https://go.room.sh/test-space"
 
 
-def test_get_existing_space(client, monkeypatch):
-    # Mock Redis get to return cached space
-    cached_space = {
-        "space_id": "existing-room-id",
-        "lesson_id": "test-lesson",
-        "tutor_spaces": [
-            {
-                "email": "tutor1@example.com",
-                "name": "Test Tutor 1",
-                "role": "tutor",
-                "space_url": "https://go.room.sh/existing-space",
-            }
-        ],
-        "student_spaces": [
-            {
-                "email": "student1@example.com",
-                "name": "Test Student 1",
-                "role": "student",
-                "space_url": "https://go.room.sh/existing-space",
-            }
-        ],
-    }
-    monkeypatch.setattr(
-        "app.services.lessonspace.redis_client.get", lambda x: json.dumps(cached_space)
-    )
+def test_create_space_no_tutors(client, monkeypatch):
+    async def mock_post(self, url, *args, **kwargs):
+        class MockResponse:
+            def raise_for_status(self):
+                pass
 
+            def json(self):
+                return {
+                    "client_url": "https://go.room.sh/test-space",
+                    "room_id": "test-room-id",
+                }
+
+        return MockResponse()
+
+    monkeypatch.setattr("httpx.AsyncClient.post", mock_post)
     response = client.post(
         "/api/space",
         json={
-            "lesson_id": "test-lesson",
-            "tutors": [
-                {
-                    "name": "Test Tutor 1",
-                    "email": "tutor1@example.com",
-                    "is_leader": True,
-                }
-            ],
-            "students": [{"name": "Test Student 1", "email": "student1@example.com"}],
+            "lesson_id": "no-tutors-lesson",
+            "tutors": [],
+            "students": [{"name": "Student", "email": "student@example.com"}],
         },
     )
-
     assert response.status_code == 200
     data = response.json()
-    assert data["space_id"] == "existing-room-id"
-    assert data["lesson_id"] == "test-lesson"
+    assert len(data["tutor_spaces"]) == 0
+    assert len(data["student_spaces"]) == 1
+
+
+def test_create_space_no_students(client, monkeypatch):
+    async def mock_post(self, url, *args, **kwargs):
+        class MockResponse:
+            def raise_for_status(self):
+                pass
+
+            def json(self):
+                return {
+                    "client_url": "https://go.room.sh/test-space",
+                    "room_id": "test-room-id",
+                }
+
+        return MockResponse()
+
+    monkeypatch.setattr("httpx.AsyncClient.post", mock_post)
+    response = client.post(
+        "/api/space",
+        json={
+            "lesson_id": "no-students-lesson",
+            "tutors": [
+                {"name": "Tutor", "email": "tutor@example.com", "is_leader": True}
+            ],
+            "students": [],
+        },
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data["tutor_spaces"]) == 1
+    assert len(data["student_spaces"]) == 0
+
+
+def test_create_space_duplicate_emails(client, monkeypatch):
+    async def mock_post(self, url, *args, **kwargs):
+        class MockResponse:
+            def raise_for_status(self):
+                pass
+
+            def json(self):
+                return {
+                    "client_url": "https://go.room.sh/test-space",
+                    "room_id": "test-room-id",
+                }
+
+        return MockResponse()
+
+    monkeypatch.setattr("httpx.AsyncClient.post", mock_post)
+    response = client.post(
+        "/api/space",
+        json={
+            "lesson_id": "dup-email-lesson",
+            "tutors": [
+                {"name": "Tutor", "email": "dup@example.com", "is_leader": True}
+            ],
+            "students": [{"name": "Student", "email": "dup@example.com"}],
+        },
+    )
+    assert response.status_code == 200
+    data = response.json()
+    # Both tutor and student with same email should be present
     assert len(data["tutor_spaces"]) == 1
     assert len(data["student_spaces"]) == 1
-    assert data["tutor_spaces"][0]["space_url"] == "https://go.room.sh/existing-space"
-    assert data["student_spaces"][0]["space_url"] == "https://go.room.sh/existing-space"
+    assert data["tutor_spaces"][0]["email"] == "dup@example.com"
+    assert data["student_spaces"][0]["email"] == "dup@example.com"
+
+
+def test_create_space_invalid_email(client, monkeypatch):
+    async def mock_post(self, url, *args, **kwargs):
+        class MockResponse:
+            def raise_for_status(self):
+                pass
+
+            def json(self):
+                return {
+                    "client_url": "https://go.room.sh/test-space",
+                    "room_id": "test-room-id",
+                }
+
+        return MockResponse()
+
+    monkeypatch.setattr("httpx.AsyncClient.post", mock_post)
+    response = client.post(
+        "/api/space",
+        json={
+            "lesson_id": "invalid-email-lesson",
+            "tutors": [{"name": "Tutor", "email": "not-an-email", "is_leader": True}],
+            "students": [],
+        },
+    )
+    assert response.status_code == 422  # FastAPI should reject invalid email
+
+
+def test_create_space_external_api_error(client, monkeypatch):
+    async def mock_post(self, url, *args, **kwargs):
+        class MockResponse:
+            def raise_for_status(self):
+                raise HTTPStatusError("error", request=None, response=None)
+
+            def json(self):
+                return {}
+
+        return MockResponse()
+
+    monkeypatch.setattr("httpx.AsyncClient.post", mock_post)
+    response = client.post(
+        "/api/space",
+        json={
+            "lesson_id": "api-error-lesson",
+            "tutors": [
+                {"name": "Tutor", "email": "tutor@example.com", "is_leader": True}
+            ],
+            "students": [],
+        },
+    )
+    assert response.status_code == 500
+
+
+def test_create_space_malformed_json(client, monkeypatch):
+    async def mock_post(self, url, *args, **kwargs):
+        class MockResponse:
+            def raise_for_status(self):
+                pass
+
+            def json(self):
+                raise ValueError("Malformed JSON")
+
+        return MockResponse()
+
+    monkeypatch.setattr("httpx.AsyncClient.post", mock_post)
+    response = client.post(
+        "/api/space",
+        json={
+            "lesson_id": "malformed-json-lesson",
+            "tutors": [
+                {"name": "Tutor", "email": "tutor@example.com", "is_leader": True}
+            ],
+            "students": [],
+        },
+    )
+    assert response.status_code == 500
+
+
+def test_create_space_multiple_tutors_one_leader(client, monkeypatch):
+    async def mock_post(self, url, *args, **kwargs):
+        class MockResponse:
+            def raise_for_status(self):
+                pass
+
+            def json(self):
+                return {
+                    "client_url": "https://go.room.sh/test-space",
+                    "room_id": "test-room-id",
+                }
+
+        return MockResponse()
+
+    monkeypatch.setattr("httpx.AsyncClient.post", mock_post)
+    response = client.post(
+        "/api/space",
+        json={
+            "lesson_id": "multi-leader-lesson",
+            "tutors": [
+                {"name": "Tutor1", "email": "t1@example.com", "is_leader": True},
+                {"name": "Tutor2", "email": "t2@example.com", "is_leader": False},
+            ],
+            "students": [],
+        },
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data["tutor_spaces"]) == 2
+    assert any(
+        t["role"] == "tutor" and t["email"] == "t1@example.com"
+        for t in data["tutor_spaces"]
+    )
+    assert any(
+        t["role"] == "tutor" and t["email"] == "t2@example.com"
+        for t in data["tutor_spaces"]
+    )
+
+
+def test_create_space_parallel_many_users(client, monkeypatch):
+    call_count = {"count": 0}
+
+    async def mock_post(self, url, *args, **kwargs):
+        call_count["count"] += 1
+
+        class MockResponse:
+            def raise_for_status(self):
+                pass
+
+            def json(self):
+                return {
+                    "client_url": f"https://go.room.sh/test-space/{call_count['count']}",
+                    "room_id": "test-room-id",
+                }
+
+        return MockResponse()
+
+    monkeypatch.setattr("httpx.AsyncClient.post", mock_post)
+    tutors = [
+        {"name": f"Tutor{i}", "email": f"tutor{i}@example.com", "is_leader": i == 0}
+        for i in range(10)
+    ]
+    students = [
+        {"name": f"Student{i}", "email": f"student{i}@example.com"} for i in range(20)
+    ]
+    response = client.post(
+        "/api/space",
+        json={
+            "lesson_id": "parallel-many-users-lesson",
+            "tutors": tutors,
+            "students": students,
+        },
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data["tutor_spaces"]) == 10
+    assert len(data["student_spaces"]) == 20
