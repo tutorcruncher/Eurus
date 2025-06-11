@@ -33,14 +33,8 @@ A FastAPI-based service for managing Lessonspace integrations.
 
 4. Start Redis (if not already running):
    ```bash
-   # On Ubuntu/Debian
    sudo service redis-server start
-   
-   # On macOS with Homebrew
-   brew services start redis
-   
-   # On Windows
-   redis-server
+
    ```
 
 5. Run the service:

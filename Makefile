@@ -3,40 +3,38 @@
 .PHONY: install install-dev format lint test coverage run clean
 
 install:
-	python -m venv venv
-	. venv/bin/activate && pip install -r requirements.txt
-	. venv/bin/activate && pip install 'logfire[fastapi]'
+	pip install --progress-bar off -U setuptools==57.5.0 pip
+	pip install --progress-bar off -r requirements.txt
 
 install-dev: install
-	. venv/bin/activate && pip install -r requirements.dev.txt
+	pip install --progress-bar off -r requirements.dev.txt
 
 format:
-	. venv/bin/activate && ruff format .
+	ruff format .
 
 lint:
-	. venv/bin/activate && ruff check .
+	ruff check .
 
 test:
-	. venv/bin/activate && pytest
+	pytest
 
 coverage:
-	. venv/bin/activate && pytest --cov=app --cov-report=term-missing --cov-report=html
+	pytest --cov=app --cov-report=term-missing --cov-report=html
 
 run:
-	. venv/bin/activate && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+	uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 clean:
-	rm -rf venv
-	find . -type d -name "__pycache__" -exec rm -r {} +
-	find . -type f -name "*.pyc" -delete
-	find . -type f -name "*.pyo" -delete
-	find . -type f -name "*.pyd" -delete
-	find . -type f -name ".coverage" -delete
-	find . -type d -name "*.egg-info" -exec rm -r {} +
-	find . -type d -name "*.egg" -exec rm -r {} +
-	find . -type d -name ".pytest_cache" -exec rm -r {} +
-	find . -type d -name ".ruff_cache" -exec rm -r {} +
-	find . -type d -name ".mypy_cache" -exec rm -r {} +
+	rm -rf `find . -name __pycache__`
+	rm -f `find . -type f -name '*.py[co]'`
+	rm -f `find . -type f -name '*~'`
+	rm -f `find . -type f -name '.*~'`
+	rm -rf .cache
+	rm -rf .pytest_cache
+	rm -rf .mypy_cache
+	rm -rf htmlcov
+	rm -f .coverage
+	rm -f .coverage.*
 
 .PHONY: docker-build
 docker-build:
