@@ -44,12 +44,20 @@ def test_create_space(client, monkeypatch):
     )
 
     response = client.post(
-        "/api/v1/spaces",
+        "/api/space",
         json={
             "lesson_id": "test-lesson",
-            "teachers": [
-                {"name": "Test Teacher 1", "email": "teacher1@example.com"},
-                {"name": "Test Teacher 2", "email": "teacher2@example.com"},
+            "tutors": [
+                {
+                    "name": "Test Tutor 1",
+                    "email": "tutor1@example.com",
+                    "is_leader": True
+                },
+                {
+                    "name": "Test Tutor 2",
+                    "email": "tutor2@example.com",
+                    "is_leader": False
+                },
             ],
             "students": [
                 {"name": "Test Student 1", "email": "student1@example.com"},
@@ -60,33 +68,72 @@ def test_create_space(client, monkeypatch):
 
     assert response.status_code == 200
     data = response.json()
-    assert data["space_url"] == "https://go.room.sh/test-space"
     assert data["space_id"] == "test-room-id"
     assert data["lesson_id"] == "test-lesson"
+    assert len(data["tutor_spaces"]) == 2
+    assert len(data["student_spaces"]) == 2
+    
+    # Verify tutor spaces
+    tutor1 = next(t for t in data["tutor_spaces"] if t["email"] == "tutor1@example.com")
+    assert tutor1["name"] == "Test Tutor 1"
+    assert tutor1["role"] == "tutor"
+    assert tutor1["space_url"] == "https://go.room.sh/test-space"
+
+    # Verify student spaces
+    student1 = next(s for s in data["student_spaces"] if s["email"] == "student1@example.com")
+    assert student1["name"] == "Test Student 1"
+    assert student1["role"] == "student"
+    assert student1["space_url"] == "https://go.room.sh/test-space"
 
 
 def test_get_existing_space(client, monkeypatch):
     # Mock Redis get to return cached space
     cached_space = {
-        "space_url": "https://go.room.sh/existing-space",
         "space_id": "existing-room-id",
         "lesson_id": "test-lesson",
+        "tutor_spaces": [
+            {
+                "email": "tutor1@example.com",
+                "name": "Test Tutor 1",
+                "role": "tutor",
+                "space_url": "https://go.room.sh/existing-space"
+            }
+        ],
+        "student_spaces": [
+            {
+                "email": "student1@example.com",
+                "name": "Test Student 1",
+                "role": "student",
+                "space_url": "https://go.room.sh/existing-space"
+            }
+        ]
     }
     monkeypatch.setattr(
         "app.services.lessonspace.redis_client.get", lambda x: json.dumps(cached_space)
     )
 
     response = client.post(
-        "/api/v1/spaces",
+        "/api/space",
         json={
             "lesson_id": "test-lesson",
-            "teachers": [{"name": "Test Teacher 1", "email": "teacher1@example.com"}],
-            "students": [{"name": "Test Student 1", "email": "student1@example.com"}],
+            "tutors": [
+                {
+                    "name": "Test Tutor 1",
+                    "email": "tutor1@example.com",
+                    "is_leader": True
+                }
+            ],
+            "students": [
+                {"name": "Test Student 1", "email": "student1@example.com"}
+            ],
         },
     )
 
     assert response.status_code == 200
     data = response.json()
-    assert data["space_url"] == "https://go.room.sh/existing-space"
     assert data["space_id"] == "existing-room-id"
     assert data["lesson_id"] == "test-lesson"
+    assert len(data["tutor_spaces"]) == 1
+    assert len(data["student_spaces"]) == 1
+    assert data["tutor_spaces"][0]["space_url"] == "https://go.room.sh/existing-space"
+    assert data["student_spaces"][0]["space_url"] == "https://go.room.sh/existing-space"

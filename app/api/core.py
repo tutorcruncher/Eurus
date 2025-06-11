@@ -4,6 +4,7 @@ from app.services.lessonspace import LessonspaceService
 
 router = APIRouter(prefix="/space", tags=["space"])
 
+
 @router.post("/", response_model=SpaceResponse)
 async def create_space(
     request: SpaceRequest,

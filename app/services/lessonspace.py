@@ -20,7 +20,9 @@ class LessonspaceService:
         cached_space = redis_client.get(space_key)
 
         if cached_space:
-            logfire.info("[LessonSpace] fetched from redis", lesson_id=request.lesson_id)
+            logfire.info(
+                "[LessonSpace] fetched from redis", lesson_id=request.lesson_id
+            )
             return SpaceResponse.model_validate_json(cached_space)
 
         async with httpx.AsyncClient() as client:
@@ -93,5 +95,7 @@ class LessonspaceService:
                 space_response.model_dump_json(),
             )
 
-            logfire.info("[LessonSpaceService] created new space", lesson_id=request.lesson_id)
+            logfire.info(
+                "[LessonSpaceService] created new space", lesson_id=request.lesson_id
+            )
             return space_response

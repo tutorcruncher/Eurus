@@ -1,104 +1,138 @@
-# Janus
+# Janus - LessonSpace Integration Service
 
-*Janus is named after the Roman god of transitions, symbolizing the service's role as a interface between the main scheduling service and actual realtime lessons.*
-
-A FastAPI-based service for managing Lessonspace integrations.
-
-## Prerequisites
-
-- Python 3.12 or higher
-- Redis server
-- Lessonspace API credentials
-
-## Setup
-
-1. Create and activate a virtual environment:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: .\venv\Scripts\activate
-   ```
-
-2. Install dependencies:
-   ```bash
-   make install-dev
-   ```
-
-3. Create a `.env` file with the following content:
-   ```
-   APP_NAME=Janus
-   DEBUG=True
-   REDIS_URL=redis://localhost:6379/0
-   LESSONSPACE_API_KEY=your_api_key_here
-   LESSONSPACE_API_URL=https://api.thelessonspace.com/v2
-   SENTRY_DSN=
-   ```
-
-4. Start Redis (if not already running):
-   ```bash
-   sudo service redis-server start
-
-   ```
-
-5. Run the service:
-   ```bash
-   make run
-   ```
-
-The service will be available at http://localhost:8000
-
-## Development
-
-### Available Make Commands
-
-- `make install`: Install production dependencies
-- `make install-dev`: Install development dependencies
-- `make format`: Format code using ruff
-- `make lint`: Run linting checks
-- `make test`: Run tests
-- `make run`: Start the service
-- `make clean`: Clean up temporary files and virtual environment
-
-### API Documentation
-
-Once the service is running, you can access:
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
-
-### Health Check
-
-The service includes a health check endpoint at `/health` that returns:
-```json
-{
-    "status": "healthy"
-}
-```
+A FastAPI service that integrates with LessonSpace to create and manage virtual learning spaces.
 
 ## Features
 
-- Create/retrieve Lessonspace spaces by lesson ID
-- Redis caching for space URLs
-- Sentry integration for error tracking
-- Logfire for structured logging
+- Create virtual learning spaces with tutor and student access
+- Generate unique, authenticated URLs for each participant
+- JWT-based authentication for secure space access
+- Redis caching for improved performance
+- Comprehensive logging with Logfire integration
+
+## Prerequisites
+
+- Python 3.12+
+- Redis server
+- LessonSpace API credentials
+
+## Installation
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd janus
+```
+
+2. Create and activate a virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+3. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+4. Create a `.env` file in the project root:
+```env
+APP_NAME=Janus
+DEBUG=True
+REDIS_URL=redis://localhost:6379/0
+LESSONSPACE_API_KEY=your_api_key_here
+LESSONSPACE_API_URL=https://api.thelessonspace.com/v2
+SENTRY_DSN=your_sentry_dsn_here  # Optional
+```
+
+## Running the Service
+
+Start the service using:
+```bash
+make run
+```
+
+Or directly with uvicorn:
+```bash
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
 
 ## API Usage
 
-### Create/Get Space
+### Create a Space
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/spaces \
+curl -X POST http://localhost:8000/api/space \
   -H "Content-Type: application/json" \
   -d '{
-    "lesson_id": "lesson-123",
-    "teacher_name": "John Doe",
-    "student_name": "Jane Smith"
+    "lesson_id": "your-lesson-id",
+    "tutors": [
+      {
+        "name": "Tutor Name",
+        "email": "tutor@example.com",
+        "is_leader": true
+      }
+    ],
+    "students": [
+      {
+        "name": "Student Name",
+        "email": "student@example.com"
+      }
+    ]
   }'
 ```
 
 Response:
 ```json
 {
-  "space_url": "https://lessonspace.com/space/123",
-  "space_id": "123",
-  "lesson_id": "lesson-123"
+  "space_id": "unique-space-id",
+  "lesson_id": "your-lesson-id",
+  "tutor_spaces": [
+    {
+      "email": "tutor@example.com",
+      "name": "Tutor Name",
+      "role": "tutor",
+      "space_url": "https://thelessonspace.com/space/unique-space-id?token=tutor-jwt-token"
+    }
+  ],
+  "student_spaces": [
+    {
+      "email": "student@example.com",
+      "name": "Student Name",
+      "role": "student",
+      "space_url": "https://thelessonspace.com/space/unique-space-id?token=student-jwt-token"
+    }
+  ]
 }
-``` 
+```
+
+Each participant receives a unique space URL containing their JWT token, which:
+- Authenticates them in the space
+- Sets their role (tutor/student)
+- Controls their permissions (e.g., tutors can lead if is_leader is true)
+
+## Development
+
+### Running Tests
+
+```bash
+make test
+```
+
+### Code Style
+
+The project uses Black for code formatting:
+```bash
+make format
+```
+
+## Architecture
+
+- **FastAPI**: Modern, fast web framework for building APIs
+- **Redis**: Caching layer for improved performance
+- **Logfire**: Structured logging and monitoring
+- **JWT**: Secure authentication for space access
+
+## License
+
+[Your License Here] 

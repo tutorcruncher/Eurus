@@ -6,8 +6,10 @@ class User(BaseModel):
     name: str = Field(..., description="Name of the user")
     email: EmailStr = Field(..., description="Email of the user")
 
+
 class LeaderUser(User):
-    is_leader:bool = Field(True, description="Whether the user is a leader")
+    is_leader: bool = Field(True, description="Whether the user is a leader")
+
 
 class SpaceRequest(BaseModel):
     lesson_id: int | str = Field(..., description="Unique identifier for the lesson")
@@ -28,7 +30,7 @@ class UserSpace(BaseModel):
 
 class SpaceResponse(BaseModel):
     space_id: int | str = Field(..., description="Unique identifier for the space")
-    lesson_id: int| str = Field(
+    lesson_id: int | str = Field(
         ..., description="Lesson identifier this space is associated with"
     )
     tutor_spaces: List[UserSpace] = Field(
