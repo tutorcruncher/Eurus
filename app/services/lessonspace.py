@@ -16,71 +16,44 @@ class LessonspaceService:
         self.headers = {"Authorization": f"Organisation {self.api_key}"}
 
     async def get_or_create_space(self, request: SpaceRequest) -> SpaceResponse:
-        # Check if space exists in Redis
-        space_key = f"lessonspace:{request.lesson_id}"
+        space_key = f"space::{request.lesson_id}"
         cached_space = redis_client.get(space_key)
 
         if cached_space:
-            logfire.info("Retrieved space from cache", lesson_id=request.lesson_id)
+            logfire.info("[LessonSpace] fetched from redis", lesson_id=request.lesson_id)
             return SpaceResponse.model_validate_json(cached_space)
 
-        # Create new space
         async with httpx.AsyncClient() as client:
-            # Create space with first teacher as leader
-            first_teacher = request.teachers[0]
-            response = await client.post(
-                f"{self.base_url}/spaces/launch/",
-                headers=self.headers,
-                json={
-                    "id": request.lesson_id,
-                    "user": {
-                        "id": first_teacher.email,
-                        "name": first_teacher.name,
-                        "role": "teacher",
-                        "leader": True,
-                    },
-                },
-            )
-            response.raise_for_status()
-            space_data = response.json()
-
-            # Store teacher's space URL
-            teacher_spaces = [
-                UserSpace(
-                    email=first_teacher.email,
-                    name=first_teacher.name,
-                    role="teacher",
-                    space_url=space_data["client_url"],
-                )
-            ]
-
-            # Add remaining teachers
-            for teacher in request.teachers[1:]:
+            tutor_spaces = []
+            space_data = None
+            for tutor in request.tutors:
                 response = await client.post(
                     f"{self.base_url}/spaces/launch/",
                     headers=self.headers,
                     json={
                         "id": request.lesson_id,
                         "user": {
-                            "id": teacher.email,
-                            "name": teacher.name,
-                            "role": "teacher",
-                            "leader": False,
+                            "id": tutor.email,
+                            "name": tutor.name,
+                            "role": "tutor",
+                            "leader": tutor.is_leader,
                         },
                     },
                 )
                 response.raise_for_status()
-                teacher_data = response.json()
-                teacher_spaces.append(
+                tutor_data = response.json()
+                if space_data is None:
+                    space_data = tutor_data
+
+                tutor_spaces.append(
                     UserSpace(
-                        email=teacher.email,
-                        name=teacher.name,
-                        role="teacher",
-                        space_url=teacher_data["client_url"],
+                        email=tutor.email,
+                        name=tutor.name,
+                        role="tutor",
+                        space_url=tutor_data["client_url"],
                     )
                 )
 
-            # Add students
             student_spaces = []
             for student in request.students:
                 response = await client.post(
@@ -110,16 +83,15 @@ class LessonspaceService:
             space_response = SpaceResponse(
                 space_id=space_data["room_id"],
                 lesson_id=request.lesson_id,
-                teacher_spaces=teacher_spaces,
+                tutor_spaces=tutor_spaces,
                 student_spaces=student_spaces,
             )
 
-            # Cache the space
             redis_client.setex(
                 space_key,
-                86400,  # 24 hours
+                86400,
                 space_response.model_dump_json(),
             )
 
-            logfire.info("Created new space", lesson_id=request.lesson_id)
+            logfire.info("[LessonSpaceService] created new space", lesson_id=request.lesson_id)
             return space_response

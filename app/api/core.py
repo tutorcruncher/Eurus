@@ -2,10 +2,9 @@ from fastapi import APIRouter, Depends
 from app.models.space import SpaceRequest, SpaceResponse
 from app.services.lessonspace import LessonspaceService
 
-router = APIRouter()
+router = APIRouter(prefix="/space", tags=["space"])
 
-
-@router.post("/spaces", response_model=SpaceResponse)
+@router.post("/", response_model=SpaceResponse)
 async def create_space(
     request: SpaceRequest,
     service: LessonspaceService = Depends(LessonspaceService),

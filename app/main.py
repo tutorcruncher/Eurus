@@ -1,7 +1,7 @@
 import sentry_sdk
 from fastapi import FastAPI
 import logfire
-from app.api.endpoints import router
+from app.api.core import router
 from app.core.config import get_settings
 
 settings = get_settings()
@@ -18,7 +18,7 @@ app = FastAPI(
 
 logfire.instrument_fastapi(app)
 
-app.include_router(router, prefix="/api/v1")
+app.include_router(router, prefix="/api")
 
 
 @app.get("/health")
