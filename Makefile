@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := install
 
-.PHONY: install install-dev format lint test run clean
+.PHONY: install install-dev format lint test coverage run clean
 
 install:
 	python -m venv venv
@@ -18,6 +18,9 @@ lint:
 
 test:
 	. venv/bin/activate && pytest
+
+coverage:
+	. venv/bin/activate && pytest --cov=app --cov-report=term-missing --cov-report=html
 
 run:
 	. venv/bin/activate && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000

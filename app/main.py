@@ -18,9 +18,9 @@ app = FastAPI(
 
 logfire.instrument_fastapi(app)
 
-app.include_router(router, prefix='/api/v1')
+app.include_router(router, prefix="/api/v1")
 
 
-@app.get('/health')
+@app.get("/health")
 async def health_check():
-    return {'status': 'healthy'} 
+    return {"status": "healthy"}

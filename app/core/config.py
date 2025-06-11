@@ -8,31 +8,34 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Debug print
-print('DEBUG: LESSONSPACE_API_KEY from env:', os.environ.get('LESSONSPACE_API_KEY'))
+print("DEBUG: LESSONSPACE_API_KEY from env:", os.environ.get("LESSONSPACE_API_KEY"))
+
 
 class Settings(BaseSettings):
-    app_name: str = Field('Lessonspace Service', alias='APP_NAME')
-    debug: bool = Field(False, alias='DEBUG')
-    
+    app_name: str = Field("Lessonspace Service", alias="APP_NAME")
+    debug: bool = Field(False, alias="DEBUG")
+
     # Redis settings
-    redis_url: str = Field('redis://localhost:6379/0', alias='REDIS_URL')
-    
+    redis_url: str = Field("redis://localhost:6379/0", alias="REDIS_URL")
+
     # Lessonspace settings
-    lessonspace_api_key: str = Field(..., alias='LESSONSPACE_API_KEY')
-    lessonspace_api_url: str = Field('https://api.thelessonspace.com/v2', alias='LESSONSPACE_API_URL')
-    
+    lessonspace_api_key: str = Field(..., alias="LESSONSPACE_API_KEY")
+    lessonspace_api_url: str = Field(
+        "https://api.thelessonspace.com/v2", alias="LESSONSPACE_API_URL"
+    )
+
     # Sentry settings
-    sentry_dsn: str | None = Field(None, alias='SENTRY_DSN')
+    sentry_dsn: str | None = Field(None, alias="SENTRY_DSN")
 
     model_config = ConfigDict(
-        extra='allow',
-        env_file='.env',
+        extra="allow",
+        env_file=".env",
         case_sensitive=True,
-        env_prefix='',
+        env_prefix="",
         populate_by_name=True,
     )
 
 
 @lru_cache()
 def get_settings() -> Settings:
-    return Settings() 
+    return Settings()
