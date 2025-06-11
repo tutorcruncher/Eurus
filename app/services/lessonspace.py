@@ -16,14 +16,14 @@ class LessonspaceService:
         self.headers = {"Authorization": f"Organisation {self.api_key}"}
 
     async def get_or_create_space(self, request: SpaceRequest) -> SpaceResponse:
-        space_key = f"space::{request.lesson_id}"
-        cached_space = redis_client.get(space_key)
-
-        if cached_space:
-            logfire.info(
-                "[LessonSpace] fetched from redis", lesson_id=request.lesson_id
-            )
-            return SpaceResponse.model_validate_json(cached_space)
+        # space_key = f"space::{request.lesson_id}"
+        # cached_space = redis_client.get(space_key)
+        #
+        # if cached_space:
+        #     logfire.info(
+        #         "[LessonSpace] fetched from redis", lesson_id=request.lesson_id
+        #     )
+        #     return SpaceResponse.model_validate_json(cached_space)
 
         async with httpx.AsyncClient() as client:
             tutor_spaces = []
@@ -89,11 +89,11 @@ class LessonspaceService:
                 student_spaces=student_spaces,
             )
 
-            redis_client.setex(
-                space_key,
-                86400,
-                space_response.model_dump_json(),
-            )
+            # redis_client.setex(
+            #     space_key,
+            #     86400,
+            #     space_response.model_dump_json(),
+            # )
 
             logfire.info(
                 "[LessonSpaceService] created new space", lesson_id=request.lesson_id
