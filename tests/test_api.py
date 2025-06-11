@@ -51,12 +51,12 @@ def test_create_space(client, monkeypatch):
                 {
                     "name": "Test Tutor 1",
                     "email": "tutor1@example.com",
-                    "is_leader": True
+                    "is_leader": True,
                 },
                 {
                     "name": "Test Tutor 2",
                     "email": "tutor2@example.com",
-                    "is_leader": False
+                    "is_leader": False,
                 },
             ],
             "students": [
@@ -72,7 +72,7 @@ def test_create_space(client, monkeypatch):
     assert data["lesson_id"] == "test-lesson"
     assert len(data["tutor_spaces"]) == 2
     assert len(data["student_spaces"]) == 2
-    
+
     # Verify tutor spaces
     tutor1 = next(t for t in data["tutor_spaces"] if t["email"] == "tutor1@example.com")
     assert tutor1["name"] == "Test Tutor 1"
@@ -80,7 +80,9 @@ def test_create_space(client, monkeypatch):
     assert tutor1["space_url"] == "https://go.room.sh/test-space"
 
     # Verify student spaces
-    student1 = next(s for s in data["student_spaces"] if s["email"] == "student1@example.com")
+    student1 = next(
+        s for s in data["student_spaces"] if s["email"] == "student1@example.com"
+    )
     assert student1["name"] == "Test Student 1"
     assert student1["role"] == "student"
     assert student1["space_url"] == "https://go.room.sh/test-space"
@@ -96,7 +98,7 @@ def test_get_existing_space(client, monkeypatch):
                 "email": "tutor1@example.com",
                 "name": "Test Tutor 1",
                 "role": "tutor",
-                "space_url": "https://go.room.sh/existing-space"
+                "space_url": "https://go.room.sh/existing-space",
             }
         ],
         "student_spaces": [
@@ -104,9 +106,9 @@ def test_get_existing_space(client, monkeypatch):
                 "email": "student1@example.com",
                 "name": "Test Student 1",
                 "role": "student",
-                "space_url": "https://go.room.sh/existing-space"
+                "space_url": "https://go.room.sh/existing-space",
             }
-        ]
+        ],
     }
     monkeypatch.setattr(
         "app.services.lessonspace.redis_client.get", lambda x: json.dumps(cached_space)
@@ -120,12 +122,10 @@ def test_get_existing_space(client, monkeypatch):
                 {
                     "name": "Test Tutor 1",
                     "email": "tutor1@example.com",
-                    "is_leader": True
+                    "is_leader": True,
                 }
             ],
-            "students": [
-                {"name": "Test Student 1", "email": "student1@example.com"}
-            ],
+            "students": [{"name": "Test Student 1", "email": "student1@example.com"}],
         },
     )
 
