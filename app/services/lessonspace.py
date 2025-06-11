@@ -26,43 +26,59 @@ class LessonspaceService:
 
         # Create new space
         async with httpx.AsyncClient() as client:
-            # First create the space
+            # Create space with first teacher as leader
+            first_teacher = request.teachers[0]
             response = await client.post(
-                f"{self.base_url}/spaces",
+                f"{self.base_url}/v2/spaces/launch/",
                 headers=self.headers,
                 json={
-                    "name": f"Lesson {request.lesson_id}",
+                    "id": request.lesson_id,
+                    "user": {
+                        "id": first_teacher.email,
+                        "name": first_teacher.name,
+                        "role": "teacher",
+                        "leader": True
+                    }
                 },
             )
             response.raise_for_status()
             space_data = response.json()
-            space_id = space_data["id"]
 
-            # Add teachers
-            for teacher in request.teachers:
+            # Add remaining teachers
+            for teacher in request.teachers[1:]:
                 await client.post(
-                    f"{self.base_url}/spaces/{space_id}/teachers",
+                    f"{self.base_url}/v2/spaces/launch/",
                     headers=self.headers,
                     json={
-                        "name": teacher.name,
-                        "email": teacher.email,
+                        "id": request.lesson_id,
+                        "user": {
+                            "id": teacher.email,
+                            "name": teacher.name,
+                            "role": "teacher",
+                            "leader": False
+                        }
                     },
                 )
 
             # Add students
             for student in request.students:
                 await client.post(
-                    f"{self.base_url}/spaces/{space_id}/students",
+                    f"{self.base_url}/v2/spaces/launch/",
                     headers=self.headers,
                     json={
-                        "name": student.name,
-                        "email": student.email,
+                        "id": request.lesson_id,
+                        "user": {
+                            "id": student.email,
+                            "name": student.name,
+                            "role": "student",
+                            "leader": False
+                        }
                     },
                 )
 
             space_response = SpaceResponse(
-                space_url=space_data["url"],
-                space_id=space_id,
+                space_url=space_data["client_url"],
+                space_id=space_data["room_id"],
                 lesson_id=request.lesson_id,
             )
 

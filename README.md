@@ -1,5 +1,7 @@
 # Janus
 
+*Janus is named after the Roman god of transitions, symbolizing the service's role as a interface between the main scheduling service and actual realtime lessons.*
+
 A FastAPI-based service for managing Lessonspace integrations.
 
 ## Prerequisites
