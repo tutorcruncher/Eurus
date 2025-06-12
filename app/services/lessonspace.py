@@ -89,11 +89,16 @@ class LessonspaceService:
                 logfire.info(
                     "[LessonSpaceService] created new space",
                     lesson_id=request.lesson_id,
+                    space_id=space_id,
+                    tutor_count=len(tutor_spaces),
+                    student_count=len(student_spaces),
                 )
                 return space_response
         except Exception as e:
             logfire.error(
-                "[LessonSpaceService] error in get_or_create_space", error=str(e)
+                "[LessonSpaceService] error in get_or_create_space",
+                lesson_id=request.lesson_id,
+                error=str(e),
             )
             raise HTTPException(
                 status_code=500, detail="Internal server error: " + str(e)

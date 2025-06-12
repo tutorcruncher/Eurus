@@ -9,7 +9,19 @@ settings = get_settings()
 if settings.sentry_dsn:
     sentry_sdk.init(dsn=settings.sentry_dsn)
 
-logfire.configure()
+
+def scrub_sensitive_data(record):
+    # Remove sensitive data from logs
+    if "headers" in record:
+        if "Authorization" in record["headers"]:
+            record["headers"]["Authorization"] = "***REDACTED***"
+    return record
+
+
+logfire.configure(
+    service_name="janus",
+    scrubbing=logfire.ScrubbingOptions(callback=scrub_sensitive_data),
+)
 
 app = FastAPI(
     title=settings.app_name,
