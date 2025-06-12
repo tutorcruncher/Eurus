@@ -24,14 +24,14 @@ def cleanup_db(db_session):
 
 def test_create_and_get_transcript(db_session):
     """Test creating and getting a transcript."""
-    lesson_id = f"test-lesson-{uuid.uuid4()}"
+    lesson_id = f'test-lesson-{uuid.uuid4()}'
     transcription = [
         {
-            "start_time": 0.0,
-            "end_time": 5.0,
-            "user": {"id": 123, "name": "John Smith"},
-            "breakout_id": "main",
-            "text": "Test transcription",
+            'start_time': 0.0,
+            'end_time': 5.0,
+            'user': {'id': 123, 'name': 'John Smith'},
+            'breakout_id': 'main',
+            'text': 'Test transcription',
         }
     ]
     transcript = create_transcript(db_session, lesson_id, transcription)
@@ -46,25 +46,25 @@ def test_create_and_get_transcript(db_session):
 
 def test_update_transcript(db_session: Session):
     """Test updating a transcript."""
-    lesson_id = f"test-lesson-{uuid.uuid4()}"
+    lesson_id = f'test-lesson-{uuid.uuid4()}'
     transcription = [
         {
-            "start_time": 0.0,
-            "end_time": 5.0,
-            "user": {"id": 123, "name": "John Smith"},
-            "breakout_id": "main",
-            "text": "Test transcription",
+            'start_time': 0.0,
+            'end_time': 5.0,
+            'user': {'id': 123, 'name': 'John Smith'},
+            'breakout_id': 'main',
+            'text': 'Test transcription',
         }
     ]
     transcript = create_transcript(db_session, lesson_id, transcription)
     db_session.commit()
     new_transcription = [
         {
-            "start_time": 0.0,
-            "end_time": 5.0,
-            "user": {"id": 123, "name": "John Smith"},
-            "breakout_id": "main",
-            "text": "Updated transcription",
+            'start_time': 0.0,
+            'end_time': 5.0,
+            'user': {'id': 123, 'name': 'John Smith'},
+            'breakout_id': 'main',
+            'text': 'Updated transcription',
         }
     ]
     updated_transcript = update_transcript(db_session, transcript.id, new_transcription)
@@ -75,14 +75,14 @@ def test_update_transcript(db_session: Session):
 
 def test_delete_transcript(db_session: Session):
     """Test deleting a transcript."""
-    lesson_id = f"test-lesson-{uuid.uuid4()}"
+    lesson_id = f'test-lesson-{uuid.uuid4()}'
     transcription = [
         {
-            "start_time": 0.0,
-            "end_time": 5.0,
-            "user": {"id": 123, "name": "John Smith"},
-            "breakout_id": "main",
-            "text": "Test transcription",
+            'start_time': 0.0,
+            'end_time': 5.0,
+            'user': {'id': 123, 'name': 'John Smith'},
+            'breakout_id': 'main',
+            'text': 'Test transcription',
         }
     ]
     transcript = create_transcript(db_session, lesson_id, transcription)
@@ -96,15 +96,15 @@ def test_delete_transcript(db_session: Session):
 
 def test_clear_transcripts(db_session: Session):
     """Test clearing all transcripts."""
-    lesson_id1 = f"test-lesson-{uuid.uuid4()}"
-    lesson_id2 = f"test-lesson-{uuid.uuid4()}"
+    lesson_id1 = f'test-lesson-{uuid.uuid4()}'
+    lesson_id2 = f'test-lesson-{uuid.uuid4()}'
     transcription = [
         {
-            "start_time": 0.0,
-            "end_time": 5.0,
-            "user": {"id": 123, "name": "John Smith"},
-            "breakout_id": "main",
-            "text": "Test transcription",
+            'start_time': 0.0,
+            'end_time': 5.0,
+            'user': {'id': 123, 'name': 'John Smith'},
+            'breakout_id': 'main',
+            'text': 'Test transcription',
         }
     ]
     create_transcript(db_session, lesson_id1, transcription)

@@ -7,7 +7,7 @@ from typing import Dict, Any, List
 
 
 class Transcript(Base):
-    __tablename__ = "transcripts"
+    __tablename__ = 'transcripts'
 
     id = Column(Integer, primary_key=True, index=True)
     lesson_id = Column(String, index=True, nullable=False)
@@ -18,7 +18,7 @@ class Transcript(Base):
     )
 
     def __repr__(self):
-        return f"<Transcript(lesson_id={self.lesson_id}, created_at={self.created_at})>"
+        return f'<Transcript(lesson_id={self.lesson_id}, created_at={self.created_at})>'
 
 
 class User(BaseModel):

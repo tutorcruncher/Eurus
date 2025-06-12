@@ -26,7 +26,7 @@ def migrate():
             )
 
             # Drop existing index if it exists
-            conn.execute(text("DROP INDEX IF EXISTS idx_transcripts_lesson_id;"))
+            conn.execute(text('DROP INDEX IF EXISTS idx_transcripts_lesson_id;'))
 
             # Add unique constraint
             conn.execute(
@@ -44,10 +44,10 @@ def migrate():
             """)
             )
 
-            print("Successfully added unique constraint to lesson_id")
+            print('Successfully added unique constraint to lesson_id')
 
 
-if __name__ == "__main__":
-    print("Running migration to add unique constraint...")
+if __name__ == '__main__':
+    print('Running migration to add unique constraint...')
     migrate()
-    print("Migration completed successfully!")
+    print('Migration completed successfully!')

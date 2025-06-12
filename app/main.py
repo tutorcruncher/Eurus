@@ -15,22 +15,18 @@ if settings.sentry_dsn:
 
 
 def scrub_sensitive_data(record):
-    # Handle both dict and ScrubMatch objects
-    if hasattr(record, "value"):
-        # It's a ScrubMatch object
-        if isinstance(record.value, dict) and "headers" in record.value:
-            if "Authorization" in record.value["headers"]:
-                record.value["headers"]["Authorization"] = "***REDACTED***"
-    elif isinstance(record, dict) and "headers" in record:
-        # It's a regular dict
-        if "Authorization" in record["headers"]:
-            record["headers"]["Authorization"] = "***REDACTED***"
+    if hasattr(record, 'value'):
+        if isinstance(record.value, dict) and 'headers' in record.value:
+            if 'Authorization' in record.value['headers']:
+                record.value['headers']['Authorization'] = '***REDACTED***'
+    elif isinstance(record, dict) and 'headers' in record:
+        if 'Authorization' in record['headers']:
+            record['headers']['Authorization'] = '***REDACTED***'
     return record
 
 
 logfire.configure(
-    service_name="janus",
-    # Disable scrubbing temporarily
+    service_name='janus',
     scrubbing=None,
 )
 
@@ -39,13 +35,13 @@ app = FastAPI(
     debug=settings.debug,
 )
 
-app.middleware("http")(api_key_auth_middleware)
+app.middleware('http')(api_key_auth_middleware)
 
 logfire.instrument_fastapi(app)
 
-app.include_router(router, prefix="/api")
+app.include_router(router, prefix='/api')
 
 
-@app.get("/health")
+@app.get('/health')
 async def health_check():
-    return {"status": "healthy"}
+    return {'status': 'healthy'}
