@@ -13,6 +13,8 @@
                    \/__/         \/__/         \/__/         \/__/    
  ````
 
+[![codecov](https://codecov.io/gh/your-username/janus/branch/main/graph/badge.svg)](https://codecov.io/gh/your-username/janus)
+
 Named after the Roman god of transitions and doorways, Janus serves as a gateway between lesson scheduling and actual virtual lessons,
 
 A FastAPI service that integrates with LessonSpace to create and manage virtual learning spaces.
