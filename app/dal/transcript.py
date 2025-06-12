@@ -12,10 +12,7 @@ def clear_transcripts(db: Session):
 
 
 def create_transcript(db: Session, lesson_id: str, transcription: dict) -> Transcript:
-    transcript = Transcript(
-        lesson_id=lesson_id,
-        transcription=transcription
-    )
+    transcript = Transcript(lesson_id=lesson_id, transcription=transcription)
     db.add(transcript)
     db.commit()
     db.refresh(transcript)
@@ -30,11 +27,15 @@ def get_transcript_by_id(db: Session, transcript_id: int) -> Optional[Transcript
     return db.query(Transcript).filter(Transcript.id == transcript_id).first()
 
 
-def list_transcripts_by_lesson_ids(db: Session, lesson_ids: List[str]) -> List[Transcript]:
+def list_transcripts_by_lesson_ids(
+    db: Session, lesson_ids: List[str]
+) -> List[Transcript]:
     return db.query(Transcript).filter(Transcript.lesson_id.in_(lesson_ids)).all()
 
 
-def update_transcript(db: Session, transcript_id: int, transcription: dict) -> Optional[Transcript]:
+def update_transcript(
+    db: Session, transcript_id: int, transcription: dict
+) -> Optional[Transcript]:
     """Update an existing transcript."""
     transcript = get_transcript_by_id(db, transcript_id)
     if transcript:
@@ -52,4 +53,4 @@ def delete_transcript(db: Session, transcript_id: int) -> bool:
         db.delete(transcript)
         db.commit()
         return True
-    return False 
+    return False

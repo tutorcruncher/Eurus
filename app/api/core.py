@@ -21,4 +21,4 @@ async def handle_transcription_webhook(
 ):
     service = TranscriptionService()
     await service.handle_webhook(webhook, lesson_id)
-    return {'status': 'success'}
+    return {"status": "success"}

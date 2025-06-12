@@ -15,12 +15,12 @@ client = TestClient(app)
 @pytest.fixture
 def mock_transcription_data():
     return {
-        'segments': [
+        "segments": [
             {
-                'start': 0.0,
-                'end': 5.0,
-                'text': 'Hello, this is a test transcription.',
-                'speaker': 'Speaker 1'
+                "start": 0.0,
+                "end": 5.0,
+                "text": "Hello, this is a test transcription.",
+                "speaker": "Speaker 1",
             }
         ]
     }
@@ -28,31 +28,31 @@ def mock_transcription_data():
 
 @pytest.fixture
 def mock_webhook_payload():
-    return {
-        'transcriptionUrl': 'https://example.com/transcription.json'
-    }
+    return {"transcriptionUrl": "https://example.com/transcription.json"}
 
 
 @pytest.fixture
 def auth_headers():
-    return {'X-API-Key': settings.api_key}
+    return {"X-API-Key": settings.api_key}
 
 
-def test_handle_transcription_webhook_success(mock_transcription_data, mock_webhook_payload, auth_headers):
+def test_handle_transcription_webhook_success(
+    mock_transcription_data, mock_webhook_payload, auth_headers
+):
     """Test successful handling of transcription webhook."""
-    lesson_id = 'test-lesson-123'
+    lesson_id = "test-lesson-123"
     db = SessionLocal()
     clear_transcripts(db)
     db.close()
-    with patch.object(TranscriptionService, 'download_transcription') as mock_download:
+    with patch.object(TranscriptionService, "download_transcription") as mock_download:
         mock_download.return_value = mock_transcription_data
         response = client.post(
-            f'/api/space/webhook/transcription/{lesson_id}',
+            f"/api/space/webhook/transcription/{lesson_id}",
             json=mock_webhook_payload,
-            headers=auth_headers
+            headers=auth_headers,
         )
         assert response.status_code == 200
-        assert response.json() == {'status': 'success'}
+        assert response.json() == {"status": "success"}
         db = SessionLocal()
         try:
             transcript = get_transcript_by_lesson_id(db, lesson_id)
@@ -63,49 +63,52 @@ def test_handle_transcription_webhook_success(mock_transcription_data, mock_webh
             db.close()
 
 
-def test_handle_transcription_webhook_download_failure(mock_webhook_payload, auth_headers):
+def test_handle_transcription_webhook_download_failure(
+    mock_webhook_payload, auth_headers
+):
     """Test webhook handling when transcription download fails."""
-    lesson_id = 'test-lesson-123'
-    with patch('app.services.transcription.download_transcription') as mock_download:
+    lesson_id = "test-lesson-123"
+    with patch("app.services.transcription.download_transcription") as mock_download:
         mock_download.return_value = None
         response = client.post(
-            f'/api/space/webhook/transcription/{lesson_id}',
+            f"/api/space/webhook/transcription/{lesson_id}",
             json=mock_webhook_payload,
-            headers=auth_headers
+            headers=auth_headers,
         )
         assert response.status_code == 500
-        assert 'Failed to download transcription' in response.json()['detail']
+        assert "Failed to download transcription" in response.json()["detail"]
 
 
 def test_handle_transcription_webhook_invalid_payload(auth_headers):
     """Test webhook handling with invalid payload."""
-    lesson_id = 'test-lesson-123'
+    lesson_id = "test-lesson-123"
     response = client.post(
-        f'/api/space/webhook/transcription/{lesson_id}',
-        json={'invalid': 'payload'},
-        headers=auth_headers
+        f"/api/space/webhook/transcription/{lesson_id}",
+        json={"invalid": "payload"},
+        headers=auth_headers,
     )
     assert response.status_code == 422
 
 
 def test_handle_transcription_webhook_unauthorized(mock_webhook_payload):
     """Test webhook handling without authentication."""
-    lesson_id = 'test-lesson-123'
+    lesson_id = "test-lesson-123"
     response = client.post(
-        f'/api/space/webhook/transcription/{lesson_id}',
-        json=mock_webhook_payload
+        f"/api/space/webhook/transcription/{lesson_id}", json=mock_webhook_payload
     )
     assert response.status_code == 401
-    assert 'Invalid or missing API key' in response.json()['detail']
+    assert "Invalid or missing API key" in response.json()["detail"]
 
 
 @pytest.mark.asyncio
-async def test_transcription_service_webhook_handling(mock_transcription_data, mock_webhook_payload):
+async def test_transcription_service_webhook_handling(
+    mock_transcription_data, mock_webhook_payload
+):
     """Test TranscriptionService webhook handling."""
     service = TranscriptionService()
-    lesson_id = 'test-lesson-123'
+    lesson_id = "test-lesson-123"
     # Mock the download_transcription method
-    with patch.object(service, 'download_transcription') as mock_download:
+    with patch.object(service, "download_transcription") as mock_download:
         mock_download.return_value = mock_transcription_data
         # Create webhook payload
         webhook = TranscriptionWebhook(**mock_webhook_payload)
@@ -119,13 +122,13 @@ async def test_transcription_service_webhook_handling(mock_transcription_data, m
 async def test_transcription_service_webhook_error_handling(mock_webhook_payload):
     """Test TranscriptionService webhook error handling."""
     service = TranscriptionService()
-    lesson_id = 'test-lesson-123'
+    lesson_id = "test-lesson-123"
     # Mock the download_transcription method to raise an exception
-    with patch.object(service, 'download_transcription') as mock_download:
-        mock_download.side_effect = Exception('Download failed')
+    with patch.object(service, "download_transcription") as mock_download:
+        mock_download.side_effect = Exception("Download failed")
         # Create webhook payload
         webhook = TranscriptionWebhook(**mock_webhook_payload)
         # Handle webhook and expect exception
         with pytest.raises(Exception) as exc_info:
             await service.handle_webhook(webhook, lesson_id)
-        assert 'Download failed' in str(exc_info.value) 
+        assert "Download failed" in str(exc_info.value)

@@ -16,7 +16,9 @@ class Settings(BaseSettings):
     debug: bool = Field(False, alias="DEBUG")
 
     # Database settings
-    database_url: str = Field("postgresql://postgres:waffle@localhost:5432/postgres", alias="DATABASE_URL")
+    database_url: str = Field(
+        "postgresql://postgres:waffle@localhost:5432/postgres", alias="DATABASE_URL"
+    )
 
     # Redis settings
     redis_url: str = Field("redis://localhost:6379/0", alias="REDIS_URL")

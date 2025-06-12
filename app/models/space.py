@@ -48,4 +48,6 @@ class SpaceResponse(BaseModel):
 
 
 class TranscriptionWebhook(BaseModel):
-    transcriptionUrl: str = Field(..., description='Pre-signed S3 URL for downloading the transcription')
+    transcriptionUrl: str = Field(
+        ..., description="Pre-signed S3 URL for downloading the transcription"
+    )
