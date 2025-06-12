@@ -326,46 +326,64 @@ def test_create_space_parallel_many_users(client, monkeypatch):
 
 def test_create_space_with_not_before(client, monkeypatch):
     called = {}
+
     async def mock_post(self, url, *args, **kwargs):
-        called['json'] = kwargs['json']
+        called["json"] = kwargs["json"]
+
         class MockResponse:
             def raise_for_status(self):
                 pass
+
             def json(self):
-                return {"client_url": "https://lessonspace.com/join/abc", "room_id": "abc"}
+                return {
+                    "client_url": "https://lessonspace.com/join/abc",
+                    "room_id": "abc",
+                }
+
         return MockResponse()
+
     monkeypatch.setattr("httpx.AsyncClient.post", mock_post)
     not_before = (datetime.now() + timedelta(hours=1)).replace(microsecond=0)
     req = {
         "lesson_id": "lesson-x",
         "tutors": [{"name": "Tutor", "email": "tutor@x.com", "is_leader": True}],
         "students": [{"name": "Student", "email": "student@x.com"}],
-        "not_before": not_before.isoformat()
+        "not_before": not_before.isoformat(),
     }
     resp = client.post("/api/space", json=req)
     assert resp.status_code == 200
     # Check that timeouts.not_before is present and correct
-    assert 'timeouts' in called['json']
-    assert called['json']['timeouts']['not_before'].startswith(not_before.isoformat()[:16])
+    assert "timeouts" in called["json"]
+    assert called["json"]["timeouts"]["not_before"].startswith(
+        not_before.isoformat()[:16]
+    )
 
 
 def test_create_space_without_not_before(client, monkeypatch):
     called = {}
+
     async def mock_post(self, url, *args, **kwargs):
-        called['json'] = kwargs['json']
+        called["json"] = kwargs["json"]
+
         class MockResponse:
             def raise_for_status(self):
                 pass
+
             def json(self):
-                return {"client_url": "https://lessonspace.com/join/abc", "room_id": "abc"}
+                return {
+                    "client_url": "https://lessonspace.com/join/abc",
+                    "room_id": "abc",
+                }
+
         return MockResponse()
+
     monkeypatch.setattr("httpx.AsyncClient.post", mock_post)
     req = {
         "lesson_id": "lesson-y",
         "tutors": [{"name": "Tutor", "email": "tutor@y.com", "is_leader": True}],
-        "students": [{"name": "Student", "email": "student@y.com"}]
+        "students": [{"name": "Student", "email": "student@y.com"}],
     }
     resp = client.post("/api/space", json=req)
     assert resp.status_code == 200
     # Check that timeouts is not present
-    assert 'timeouts' not in called['json']
+    assert "timeouts" not in called["json"]

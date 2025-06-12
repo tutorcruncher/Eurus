@@ -17,7 +17,9 @@ class LessonspaceService:
         self.base_url = settings.lessonspace_api_url
         self.headers = {"Authorization": f"Organisation {self.api_key}"}
 
-    async def _create_user_space(self, client, lesson_id, user, role, leader, not_before=None):
+    async def _create_user_space(
+        self, client, lesson_id, user, role, leader, not_before=None
+    ):
         request_data = {
             "id": lesson_id,
             "user": {
@@ -25,7 +27,7 @@ class LessonspaceService:
                 "name": user.name,
                 "role": role,
                 "leader": leader,
-            }
+            },
         }
         if not_before:
             request_data["timeouts"] = {"not_before": not_before.isoformat()}
@@ -64,7 +66,7 @@ class LessonspaceService:
                             tutor,
                             "tutor",
                             tutor.is_leader,
-                            request.not_before
+                            request.not_before,
                         )
                     )
                 for student in request.students:
@@ -75,7 +77,7 @@ class LessonspaceService:
                             student,
                             "student",
                             False,
-                            request.not_before
+                            request.not_before,
                         )
                     )
                 results = await asyncio.gather(*tasks)
@@ -102,7 +104,9 @@ class LessonspaceService:
                     space_id=space_id,
                     tutor_count=len(tutor_spaces),
                     student_count=len(student_spaces),
-                    not_before=request.not_before.isoformat() if request.not_before else None
+                    not_before=request.not_before.isoformat()
+                    if request.not_before
+                    else None,
                 )
                 return space_response
         except Exception as e:

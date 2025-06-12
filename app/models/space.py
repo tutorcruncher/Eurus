@@ -22,7 +22,7 @@ class SpaceRequest(BaseModel):
     )
     not_before: Optional[datetime] = Field(
         None,
-        description="Earliest time that users can join the space. If not set, users can join immediately."
+        description="Earliest time that users can join the space. If not set, users can join immediately.",
     )
 
 
