@@ -1,19 +1,32 @@
 # Janus - LessonSpace Integration Service
 
+        ___         ___           ___           ___           ___     
+       /\  \       /\  \         /\__\         /\__\         /\  \    
+       \:\  \     /::\  \       /::|  |       /:/  /        /::\  \   
+   ___ /::\__\   /:/\:\  \     /:|:|  |      /:/  /        /:/\ \  \  
+  /\  /:/\/__/  /::\~\:\  \   /:/|:|  |__   /:/  /  ___   _\:\~\ \  \ 
+  \:\/:/  /    /:/\:\ \:\__\ /:/ |:| /\__\ /:/__/  /\__\ /\ \:\ \ \__\
+   \::/  /     \/__\:\/:/  / \/__|:|/:/  / \:\  \ /:/  / \:\ \:\ \/__/
+    \/__/           \::/  /      |:/:/  /   \:\  /:/  /   \:\ \:\__\  
+                    /:/  /       |::/  /     \:\/:/  /     \:\/:/  /  
+                   /:/  /        /:/  /       \::/  /       \::/  /   
+                   \/__/         \/__/         \/__/         \/__/    
+
+Named after the Roman god of transitions and doorways, Janus serves as a gateway between tutors and students in virtual learning spaces.
+
 A FastAPI service that integrates with LessonSpace to create and manage virtual learning spaces.
 
 ## Features
 
 - Create virtual learning spaces with tutor and student access
 - Generate unique, authenticated URLs for each participant
-- JWT-based authentication for secure space access
-- Redis caching for improved performance
+- Parallel API requests for improved performance
 - Comprehensive logging with Logfire integration
+- Secure handling of sensitive data
 
 ## Prerequisites
 
 - Python 3.12+
-- Redis server
 - LessonSpace API credentials
 
 ## Installation
@@ -39,7 +52,6 @@ pip install -r requirements.txt
 ```env
 APP_NAME=Janus
 DEBUG=True
-REDIS_URL=redis://localhost:6379/0
 LESSONSPACE_API_KEY=your_api_key_here
 LESSONSPACE_API_URL=https://api.thelessonspace.com/v2
 SENTRY_DSN=your_sentry_dsn_here  # Optional
@@ -121,18 +133,15 @@ make test
 
 ### Code Style
 
-The project uses Black for code formatting:
+The project uses Ruff for code formatting and linting:
 ```bash
 make format
+make lint
 ```
 
 ## Architecture
 
 - **FastAPI**: Modern, fast web framework for building APIs
-- **Redis**: Caching layer for improved performance
-- **Logfire**: Structured logging and monitoring
+- **asyncio**: Parallel API requests for improved performance
+- **Logfire**: Structured logging with sensitive data scrubbing
 - **JWT**: Secure authentication for space access
-
-## License
-
-[Your License Here] 
