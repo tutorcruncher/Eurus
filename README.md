@@ -21,9 +21,6 @@ A FastAPI service that integrates with LessonSpace to create and manage virtual 
 
 - Create virtual learning spaces with tutor and student access
 - Generate unique, authenticated URLs for each participant
-- Parallel API requests for improved performance
-- Comprehensive logging with Logfire integration
-- Secure handling of sensitive data
 
 ## Prerequisites
 

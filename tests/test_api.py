@@ -41,19 +41,29 @@ def test_create_space(client, monkeypatch):
             "lesson_id": "test-lesson",
             "tutors": [
                 {
+                    "user_id": 1,
                     "name": "Test Tutor 1",
                     "email": "tutor1@example.com",
                     "is_leader": True,
                 },
                 {
+                    "user_id": 2,
                     "name": "Test Tutor 2",
                     "email": "tutor2@example.com",
                     "is_leader": False,
                 },
             ],
             "students": [
-                {"name": "Test Student 1", "email": "student1@example.com"},
-                {"name": "Test Student 2", "email": "student2@example.com"},
+                {
+                    "user_id": 3,
+                    "name": "Test Student 1",
+                    "email": "student1@example.com",
+                },
+                {
+                    "user_id": 4,
+                    "name": "Test Student 2",
+                    "email": "student2@example.com",
+                },
             ],
         },
     )
@@ -63,13 +73,11 @@ def test_create_space(client, monkeypatch):
     assert data["lesson_id"] == "test-lesson"
     assert len(data["tutor_spaces"]) == 2
     assert len(data["student_spaces"]) == 2
-    tutor1 = next(t for t in data["tutor_spaces"] if t["email"] == "tutor1@example.com")
+    tutor1 = next(t for t in data["tutor_spaces"] if t["user_id"] == 1)
     assert tutor1["name"] == "Test Tutor 1"
     assert tutor1["role"] == "tutor"
     assert tutor1["space_url"] == "https://go.room.sh/test-space"
-    student1 = next(
-        s for s in data["student_spaces"] if s["email"] == "student1@example.com"
-    )
+    student1 = next(s for s in data["student_spaces"] if s["user_id"] == 3)
     assert student1["name"] == "Test Student 1"
     assert student1["role"] == "student"
     assert student1["space_url"] == "https://go.room.sh/test-space"
@@ -95,7 +103,9 @@ def test_create_space_no_tutors(client, monkeypatch):
         json={
             "lesson_id": "no-tutors-lesson",
             "tutors": [],
-            "students": [{"name": "Student", "email": "student@example.com"}],
+            "students": [
+                {"user_id": 1, "name": "Student", "email": "student@example.com"}
+            ],
         },
     )
     assert response.status_code == 200
@@ -124,7 +134,12 @@ def test_create_space_no_students(client, monkeypatch):
         json={
             "lesson_id": "no-students-lesson",
             "tutors": [
-                {"name": "Tutor", "email": "tutor@example.com", "is_leader": True}
+                {
+                    "user_id": 1,
+                    "name": "Tutor",
+                    "email": "tutor@example.com",
+                    "is_leader": True,
+                }
             ],
             "students": [],
         },
@@ -155,9 +170,14 @@ def test_create_space_duplicate_emails(client, monkeypatch):
         json={
             "lesson_id": "dup-email-lesson",
             "tutors": [
-                {"name": "Tutor", "email": "dup@example.com", "is_leader": True}
+                {
+                    "user_id": 1,
+                    "name": "Tutor",
+                    "email": "dup@example.com",
+                    "is_leader": True,
+                }
             ],
-            "students": [{"name": "Student", "email": "dup@example.com"}],
+            "students": [{"user_id": 2, "name": "Student", "email": "dup@example.com"}],
         },
     )
     assert response.status_code == 200
@@ -165,8 +185,8 @@ def test_create_space_duplicate_emails(client, monkeypatch):
     # Both tutor and student with same email should be present
     assert len(data["tutor_spaces"]) == 1
     assert len(data["student_spaces"]) == 1
-    assert data["tutor_spaces"][0]["email"] == "dup@example.com"
-    assert data["student_spaces"][0]["email"] == "dup@example.com"
+    assert data["tutor_spaces"][0]["user_id"] == 1
+    assert data["student_spaces"][0]["user_id"] == 2
 
 
 def test_create_space_invalid_email(client, monkeypatch):
@@ -188,7 +208,14 @@ def test_create_space_invalid_email(client, monkeypatch):
         "/api/space",
         json={
             "lesson_id": "invalid-email-lesson",
-            "tutors": [{"name": "Tutor", "email": "not-an-email", "is_leader": True}],
+            "tutors": [
+                {
+                    "user_id": 1,
+                    "name": "Tutor",
+                    "email": "not-an-email",
+                    "is_leader": True,
+                }
+            ],
             "students": [],
         },
     )
@@ -212,7 +239,12 @@ def test_create_space_external_api_error(client, monkeypatch):
         json={
             "lesson_id": "api-error-lesson",
             "tutors": [
-                {"name": "Tutor", "email": "tutor@example.com", "is_leader": True}
+                {
+                    "user_id": 1,
+                    "name": "Tutor",
+                    "email": "tutor@example.com",
+                    "is_leader": True,
+                }
             ],
             "students": [],
         },
@@ -237,7 +269,12 @@ def test_create_space_malformed_json(client, monkeypatch):
         json={
             "lesson_id": "malformed-json-lesson",
             "tutors": [
-                {"name": "Tutor", "email": "tutor@example.com", "is_leader": True}
+                {
+                    "user_id": 1,
+                    "name": "Tutor",
+                    "email": "tutor@example.com",
+                    "is_leader": True,
+                }
             ],
             "students": [],
         },
@@ -265,8 +302,18 @@ def test_create_space_multiple_tutors_one_leader(client, monkeypatch):
         json={
             "lesson_id": "multi-leader-lesson",
             "tutors": [
-                {"name": "Tutor1", "email": "t1@example.com", "is_leader": True},
-                {"name": "Tutor2", "email": "t2@example.com", "is_leader": False},
+                {
+                    "user_id": 1,
+                    "name": "Tutor1",
+                    "email": "t1@example.com",
+                    "is_leader": True,
+                },
+                {
+                    "user_id": 2,
+                    "name": "Tutor2",
+                    "email": "t2@example.com",
+                    "is_leader": False,
+                },
             ],
             "students": [],
         },
@@ -274,14 +321,8 @@ def test_create_space_multiple_tutors_one_leader(client, monkeypatch):
     assert response.status_code == 200
     data = response.json()
     assert len(data["tutor_spaces"]) == 2
-    assert any(
-        t["role"] == "tutor" and t["email"] == "t1@example.com"
-        for t in data["tutor_spaces"]
-    )
-    assert any(
-        t["role"] == "tutor" and t["email"] == "t2@example.com"
-        for t in data["tutor_spaces"]
-    )
+    assert any(t["user_id"] == 1 and t["role"] == "tutor" for t in data["tutor_spaces"])
+    assert any(t["user_id"] == 2 and t["role"] == "tutor" for t in data["tutor_spaces"])
 
 
 def test_create_space_parallel_many_users(client, monkeypatch):
@@ -304,11 +345,17 @@ def test_create_space_parallel_many_users(client, monkeypatch):
 
     monkeypatch.setattr("httpx.AsyncClient.post", mock_post)
     tutors = [
-        {"name": f"Tutor{i}", "email": f"tutor{i}@example.com", "is_leader": i == 0}
+        {
+            "user_id": i,
+            "name": f"Tutor{i}",
+            "email": f"tutor{i}@example.com",
+            "is_leader": i == 0,
+        }
         for i in range(10)
     ]
     students = [
-        {"name": f"Student{i}", "email": f"student{i}@example.com"} for i in range(20)
+        {"user_id": i + 10, "name": f"Student{i}", "email": f"student{i}@example.com"}
+        for i in range(20)
     ]
     response = client.post(
         "/api/space",
@@ -346,8 +393,10 @@ def test_create_space_with_not_before(client, monkeypatch):
     not_before = (datetime.now() + timedelta(hours=1)).replace(microsecond=0)
     req = {
         "lesson_id": "lesson-x",
-        "tutors": [{"name": "Tutor", "email": "tutor@x.com", "is_leader": True}],
-        "students": [{"name": "Student", "email": "student@x.com"}],
+        "tutors": [
+            {"user_id": 1, "name": "Tutor", "email": "tutor@x.com", "is_leader": True}
+        ],
+        "students": [{"user_id": 2, "name": "Student", "email": "student@x.com"}],
         "not_before": not_before.isoformat(),
     }
     resp = client.post("/api/space", json=req)
@@ -380,8 +429,10 @@ def test_create_space_without_not_before(client, monkeypatch):
     monkeypatch.setattr("httpx.AsyncClient.post", mock_post)
     req = {
         "lesson_id": "lesson-y",
-        "tutors": [{"name": "Tutor", "email": "tutor@y.com", "is_leader": True}],
-        "students": [{"name": "Student", "email": "student@y.com"}],
+        "tutors": [
+            {"user_id": 1, "name": "Tutor", "email": "tutor@y.com", "is_leader": True}
+        ],
+        "students": [{"user_id": 2, "name": "Student", "email": "student@y.com"}],
     }
     resp = client.post("/api/space", json=req)
     assert resp.status_code == 200

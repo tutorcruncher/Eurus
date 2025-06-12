@@ -23,7 +23,7 @@ class LessonspaceService:
         request_data = {
             "id": lesson_id,
             "user": {
-                "id": user.email,
+                "id": user.user_id,
                 "name": user.name,
                 "role": role,
                 "leader": leader,
@@ -39,7 +39,7 @@ class LessonspaceService:
         resp.raise_for_status()
         data = resp.json()
         return UserSpace(
-            email=user.email,
+            user_id=user.user_id,
             name=user.name,
             role=role,
             space_url=data["client_url"],
