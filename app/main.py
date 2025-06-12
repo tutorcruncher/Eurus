@@ -1,8 +1,10 @@
 import sentry_sdk
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
+from fastapi.responses import JSONResponse
 import logfire
 from app.api.core import router
 from app.core.config import get_settings
+from app.middleware import api_key_auth_middleware
 
 settings = get_settings()
 
@@ -27,6 +29,8 @@ app = FastAPI(
     title=settings.app_name,
     debug=settings.debug,
 )
+
+app.middleware("http")(api_key_auth_middleware)
 
 logfire.instrument_fastapi(app)
 
