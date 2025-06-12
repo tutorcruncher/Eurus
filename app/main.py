@@ -1,10 +1,12 @@
 import sentry_sdk
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request, status, Depends, HTTPException
 from fastapi.responses import JSONResponse
 import logfire
 from app.api.core import router
 from app.core.config import get_settings
 from app.middleware import api_key_auth_middleware
+from app.models.space import TranscriptionWebhook
+from app.services.transcription import TranscriptionService
 
 settings = get_settings()
 

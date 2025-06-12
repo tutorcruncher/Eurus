@@ -28,6 +28,13 @@ class LessonspaceService:
                 "role": role,
                 "leader": leader,
             },
+            "transcribe": True,
+            "record_av": True,
+            "webhooks": {
+                "transcription": {
+                    "finish": f"{settings.webhook_base_url}/api/space/webhook/transcription/{lesson_id}"
+                }
+            }
         }
         if not_before:
             request_data["timeouts"] = {"not_before": not_before.isoformat()}

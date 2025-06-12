@@ -45,3 +45,7 @@ class SpaceResponse(BaseModel):
     student_spaces: List[UserSpace] = Field(
         ..., description="List of student-specific space URLs"
     )
+
+
+class TranscriptionWebhook(BaseModel):
+    transcriptionUrl: str = Field(..., description='Pre-signed S3 URL for downloading the transcription')
