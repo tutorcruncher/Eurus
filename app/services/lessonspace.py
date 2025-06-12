@@ -17,19 +17,22 @@ class LessonspaceService:
         self.base_url = settings.lessonspace_api_url
         self.headers = {"Authorization": f"Organisation {self.api_key}"}
 
-    async def _create_user_space(self, client, lesson_id, user, role, leader):
+    async def _create_user_space(self, client, lesson_id, user, role, leader, not_before=None):
+        request_data = {
+            "id": lesson_id,
+            "user": {
+                "id": user.email,
+                "name": user.name,
+                "role": role,
+                "leader": leader,
+            }
+        }
+        if not_before:
+            request_data["timeouts"] = {"not_before": not_before.isoformat()}
         resp = await client.post(
             f"{self.base_url}/spaces/launch/",
             headers=self.headers,
-            json={
-                "id": lesson_id,
-                "user": {
-                    "id": user.email,
-                    "name": user.name,
-                    "role": role,
-                    "leader": leader,
-                },
-            },
+            json=request_data,
         )
         resp.raise_for_status()
         data = resp.json()
@@ -56,23 +59,30 @@ class LessonspaceService:
                 for tutor in request.tutors:
                     tasks.append(
                         self._create_user_space(
-                            client, request.lesson_id, tutor, "tutor", tutor.is_leader
+                            client,
+                            request.lesson_id,
+                            tutor,
+                            "tutor",
+                            tutor.is_leader,
+                            request.not_before
                         )
                     )
                 for student in request.students:
                     tasks.append(
                         self._create_user_space(
-                            client, request.lesson_id, student, "student", False
+                            client,
+                            request.lesson_id,
+                            student,
+                            "student",
+                            False,
+                            request.not_before
                         )
                     )
-
                 results = await asyncio.gather(*tasks)
                 user_spaces, room_ids = zip(*results)
                 tutor_spaces = [us for us in user_spaces if us.role == "tutor"]
                 student_spaces = [us for us in user_spaces if us.role == "student"]
-                # All room_ids will be the same for the same lesson, so just pick the first
                 space_id = room_ids[0] if room_ids else None
-
                 space_response = SpaceResponse(
                     space_id=space_id,
                     lesson_id=request.lesson_id,
@@ -92,6 +102,7 @@ class LessonspaceService:
                     space_id=space_id,
                     tutor_count=len(tutor_spaces),
                     student_count=len(student_spaces),
+                    not_before=request.not_before.isoformat() if request.not_before else None
                 )
                 return space_response
         except Exception as e:

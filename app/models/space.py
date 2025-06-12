@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional
+from datetime import datetime
 
 
 class User(BaseModel):
@@ -18,6 +19,10 @@ class SpaceRequest(BaseModel):
     )
     students: List[User] = Field(
         ..., description="List of students participating in the lesson"
+    )
+    not_before: Optional[datetime] = Field(
+        None,
+        description="Earliest time that users can join the space. If not set, users can join immediately."
     )
 
 
