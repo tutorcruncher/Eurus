@@ -14,16 +14,18 @@ client = TestClient(app)
 
 @pytest.fixture
 def mock_transcription_data():
-    return {
-        "segments": [
-            {
-                "start": 0.0,
-                "end": 5.0,
-                "text": "Hello, this is a test transcription.",
-                "speaker": "Speaker 1",
-            }
-        ]
-    }
+    return [
+        {
+            "start_time": 0.0,
+            "end_time": 5.0,
+            "user": {
+                "id": 123,
+                "name": "John Smith"
+            },
+            "breakout_id": "main",
+            "text": "Hello, this is a test transcription."
+        }
+    ]
 
 
 @pytest.fixture
@@ -57,8 +59,8 @@ def test_handle_transcription_webhook_success(
         try:
             transcript = get_transcript_by_lesson_id(db, lesson_id)
             assert transcript is not None
-            # Accept any dict for transcription, since the DB may have old test data
-            assert isinstance(transcript.transcription, dict)
+            # Accept any list for transcription, since the DB may have old test data
+            assert isinstance(transcript.transcription, list)
         finally:
             db.close()
 
@@ -146,18 +148,20 @@ async def test_transcription_service_with_real_s3_url():
     }
     webhook = TranscriptionWebhook(**webhook_payload)
 
-    # Mock the download_transcription method to return test data
+    # Mock the download_transcription method to return test data in Lessonspace format
     with patch.object(service, "download_transcription") as mock_download:
-        mock_download.return_value = {
-            "segments": [
-                {
-                    "start": 0.0,
-                    "end": 5.0,
-                    "text": "Test transcription from S3",
-                    "speaker": "Speaker 1",
-                }
-            ]
-        }
+        mock_download.return_value = [
+            {
+                "start_time": 0.0,
+                "end_time": 5.0,
+                "user": {
+                    "id": 123,
+                    "name": "John Smith"
+                },
+                "breakout_id": "main",
+                "text": "Test transcription from S3"
+            }
+        ]
 
         # Handle webhook
         await service.handle_webhook(webhook, lesson_id)
@@ -167,8 +171,26 @@ async def test_transcription_service_with_real_s3_url():
         try:
             transcript = get_transcript_by_lesson_id(db, lesson_id)
             assert transcript is not None
-            assert isinstance(transcript.transcription, dict)
-            assert "segments" in transcript.transcription
-            assert len(transcript.transcription["segments"]) > 0
+            assert isinstance(transcript.transcription, list)
+            assert len(transcript.transcription) > 0
+            assert "start_time" in transcript.transcription[0]
+            assert "end_time" in transcript.transcription[0]
+            assert "user" in transcript.transcription[0]
+            assert "breakout_id" in transcript.transcription[0]
+            assert "text" in transcript.transcription[0]
         finally:
             db.close()
+
+
+def test_get_transcript_not_found(auth_headers):
+    """Test getting a transcript that doesn't exist."""
+    response = client.get("/api/space/transcripts/nonexistent-id", headers=auth_headers)
+    assert response.status_code == 404
+    assert "Transcript not found" in response.json()["detail"]
+
+
+def test_get_transcript_unauthorized():
+    """Test getting a transcript without authentication."""
+    response = client.get("/api/space/transcripts/some-id", headers={})
+    assert response.status_code == 401
+    assert "Invalid or missing API key" in response.json()["detail"]

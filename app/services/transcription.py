@@ -8,6 +8,8 @@ from app.models.space import TranscriptionWebhook
 from app.dal.transcript import create_transcript
 from app.db.session import SessionLocal
 import logfire
+from app.models.transcript import Transcript
+from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -122,3 +124,13 @@ class TranscriptionService:
             raise HTTPException(
                 status_code=500, detail="Failed to process transcription: " + str(e)
             )
+
+    def get_transcript(self, lesson_id: str, db: Session) -> Transcript:
+        """Get transcript for a lesson by ID."""
+        transcript = db.query(Transcript).filter(Transcript.lesson_id == lesson_id).first()
+        if not transcript:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Transcript not found for lesson ID: {lesson_id}"
+            )
+        return transcript
