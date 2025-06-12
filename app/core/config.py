@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     # Sentry settings
     sentry_dsn: str | None = Field(None, alias="SENTRY_DSN")
 
+    # API key for authentication
+    api_key: str = Field(..., alias="API_KEY")
+
     model_config = ConfigDict(
         extra="allow",
         env_file=".env",

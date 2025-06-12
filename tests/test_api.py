@@ -4,6 +4,11 @@ from fastapi.testclient import TestClient
 from app.main import app
 from httpx import HTTPStatusError
 from datetime import datetime, timedelta
+from app.core.config import get_settings
+import time
+from datetime import datetime, timezone
+
+settings = get_settings()
 
 
 @pytest.fixture
@@ -37,6 +42,7 @@ def test_create_space(client, monkeypatch):
     monkeypatch.setattr("httpx.AsyncClient.post", mock_post)
     response = client.post(
         "/api/space",
+        headers={"X-API-Key": settings.api_key},
         json={
             "lesson_id": "test-lesson",
             "tutors": [
@@ -100,6 +106,7 @@ def test_create_space_no_tutors(client, monkeypatch):
     monkeypatch.setattr("httpx.AsyncClient.post", mock_post)
     response = client.post(
         "/api/space",
+        headers={"X-API-Key": settings.api_key},
         json={
             "lesson_id": "no-tutors-lesson",
             "tutors": [],
@@ -131,6 +138,7 @@ def test_create_space_no_students(client, monkeypatch):
     monkeypatch.setattr("httpx.AsyncClient.post", mock_post)
     response = client.post(
         "/api/space",
+        headers={"X-API-Key": settings.api_key},
         json={
             "lesson_id": "no-students-lesson",
             "tutors": [
@@ -167,6 +175,7 @@ def test_create_space_duplicate_emails(client, monkeypatch):
     monkeypatch.setattr("httpx.AsyncClient.post", mock_post)
     response = client.post(
         "/api/space",
+        headers={"X-API-Key": settings.api_key},
         json={
             "lesson_id": "dup-email-lesson",
             "tutors": [
@@ -206,6 +215,7 @@ def test_create_space_invalid_email(client, monkeypatch):
     monkeypatch.setattr("httpx.AsyncClient.post", mock_post)
     response = client.post(
         "/api/space",
+        headers={"X-API-Key": settings.api_key},
         json={
             "lesson_id": "invalid-email-lesson",
             "tutors": [
@@ -236,6 +246,7 @@ def test_create_space_external_api_error(client, monkeypatch):
     monkeypatch.setattr("httpx.AsyncClient.post", mock_post)
     response = client.post(
         "/api/space",
+        headers={"X-API-Key": settings.api_key},
         json={
             "lesson_id": "api-error-lesson",
             "tutors": [
@@ -266,6 +277,7 @@ def test_create_space_malformed_json(client, monkeypatch):
     monkeypatch.setattr("httpx.AsyncClient.post", mock_post)
     response = client.post(
         "/api/space",
+        headers={"X-API-Key": settings.api_key},
         json={
             "lesson_id": "malformed-json-lesson",
             "tutors": [
@@ -299,6 +311,7 @@ def test_create_space_multiple_tutors_one_leader(client, monkeypatch):
     monkeypatch.setattr("httpx.AsyncClient.post", mock_post)
     response = client.post(
         "/api/space",
+        headers={"X-API-Key": settings.api_key},
         json={
             "lesson_id": "multi-leader-lesson",
             "tutors": [
@@ -359,6 +372,7 @@ def test_create_space_parallel_many_users(client, monkeypatch):
     ]
     response = client.post(
         "/api/space",
+        headers={"X-API-Key": settings.api_key},
         json={
             "lesson_id": "parallel-many-users-lesson",
             "tutors": tutors,
@@ -399,7 +413,7 @@ def test_create_space_with_not_before(client, monkeypatch):
         "students": [{"user_id": 2, "name": "Student", "email": "student@x.com"}],
         "not_before": not_before.isoformat(),
     }
-    resp = client.post("/api/space", json=req)
+    resp = client.post("/api/space", headers={"X-API-Key": settings.api_key}, json=req)
     assert resp.status_code == 200
     # Check that timeouts.not_before is present and correct
     assert "timeouts" in called["json"]
@@ -434,7 +448,47 @@ def test_create_space_without_not_before(client, monkeypatch):
         ],
         "students": [{"user_id": 2, "name": "Student", "email": "student@y.com"}],
     }
-    resp = client.post("/api/space", json=req)
+    resp = client.post("/api/space", headers={"X-API-Key": settings.api_key}, json=req)
     assert resp.status_code == 200
     # Check that timeouts is not present
     assert "timeouts" not in called["json"]
+
+
+def test_api_key_required(client):
+    # Test without API key
+    response = client.post("/api/space/")
+    assert response.status_code == 401
+    assert response.json() == {"detail": "Invalid or missing API key"}
+
+    # Test with invalid API key
+    response = client.post("/api/space/", headers={"X-API-Key": "invalid"})
+    assert response.status_code == 401
+    assert response.json() == {"detail": "Invalid or missing API key"}
+
+    # Test with valid API key
+    response = client.post(
+        "/api/space/",
+        headers={"X-API-Key": settings.api_key},
+        json={
+            "lesson_id": "test-lesson",
+            "tutors": [
+                {
+                    "user_id": 1,
+                    "name": "Test Tutor",
+                    "email": "tutor@example.com",
+                    "is_leader": True,
+                }
+            ],
+            "students": [
+                {"user_id": 2, "name": "Test Student", "email": "student@example.com"}
+            ],
+        },
+    )
+    assert response.status_code == 200
+
+
+def test_health_check_no_auth_required(client):
+    # Health check should work without API key
+    response = client.get("/health")
+    assert response.status_code == 200
+    assert response.json() == {"status": "healthy"}
