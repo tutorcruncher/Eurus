@@ -13,7 +13,7 @@
                    \/__/         \/__/         \/__/         \/__/    
  ````
 
-Named after the Roman god of transitions and doorways, Janus serves as a gateway between tutors and students in virtual learning spaces.
+Named after the Roman god of transitions and doorways, Janus serves as a gateway between lesson scheduling and actual virtual lessons,
 
 A FastAPI service that integrates with LessonSpace to create and manage virtual learning spaces.
 
