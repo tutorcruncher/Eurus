@@ -1,3 +1,4 @@
+# See schema.sql for the SQL definition of the transcripts table
 from sqlalchemy import Column, String, JSON, DateTime, Integer
 from datetime import datetime
 from app.db.base_class import Base

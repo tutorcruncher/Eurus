@@ -1,34 +1,32 @@
 import pytest
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from app.db.base_class import Base
-from app.core.config import get_settings
+import os
 
-# Get test database URL
-settings = get_settings()
-TEST_DATABASE_URL = settings.database_url + "_test"
-
-# Create test engine and session
-test_engine = create_engine(TEST_DATABASE_URL)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
-
+# Test database URL
+TEST_DATABASE_URL = os.getenv("TEST_DATABASE_URL", "postgresql://postgres:waffle@localhost:5432/eurus_test")
 
 @pytest.fixture(scope="session")
-def db_engine():
+def engine():
     """Create a test database engine."""
-    # Create test database tables
-    Base.metadata.create_all(bind=test_engine)
-    yield test_engine
-    # Drop test database tables
-    Base.metadata.drop_all(bind=test_engine)
+    engine = create_engine(TEST_DATABASE_URL)
+    return engine
 
+@pytest.fixture(scope="session")
+def tables(engine):
+    """Create all tables in the test database."""
+    Base.metadata.create_all(engine)
+    yield
+    Base.metadata.drop_all(engine)
 
-@pytest.fixture(scope="function")
-def db_session(db_engine):
-    """Create a test database session."""
-    connection = db_engine.connect()
+@pytest.fixture
+def db_session(engine, tables):
+    """Create a new database session for a test."""
+    connection = engine.connect()
     transaction = connection.begin()
-    session = TestingSessionLocal(bind=connection)
+    Session = sessionmaker(bind=connection)
+    session = Session()
 
     yield session
 
