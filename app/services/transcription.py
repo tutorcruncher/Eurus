@@ -1,5 +1,6 @@
 import logging
 import requests
+import httpx
 from typing import Optional
 from fastapi import HTTPException
 from app.core.config import get_settings
@@ -60,6 +61,25 @@ class TranscriptionService:
                 response = await client.get(transcription_url)
                 response.raise_for_status()
                 return response.json()
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 403:
+                logfire.error(
+                    "[TranscriptionService] S3 access denied",
+                    error=str(e),
+                    url=transcription_url,
+                )
+                raise HTTPException(
+                    status_code=500,
+                    detail="Access denied to transcription file. Please check S3 permissions.",
+                )
+            logfire.error(
+                "[TranscriptionService] error downloading transcription",
+                error=str(e),
+                url=transcription_url,
+            )
+            raise HTTPException(
+                status_code=500, detail="Failed to download transcription: " + str(e)
+            )
         except Exception as e:
             logfire.error(
                 "[TranscriptionService] error downloading transcription",

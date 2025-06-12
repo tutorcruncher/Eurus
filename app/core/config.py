@@ -4,11 +4,7 @@ from pydantic_settings import BaseSettings
 from pydantic import ConfigDict, Field
 from dotenv import load_dotenv
 
-# Explicitly load .env file
 load_dotenv()
-
-# Debug print
-print("DEBUG: LESSONSPACE_API_KEY from env:", os.environ.get("LESSONSPACE_API_KEY"))
 
 
 class Settings(BaseSettings):
@@ -17,11 +13,11 @@ class Settings(BaseSettings):
 
     # Database settings
     database_url: str = Field(
-        "postgresql://postgres:waffle@localhost:5432/postgres", alias="DATABASE_URL"
+        "postgresql://postgres:waffle@localhost:5432/eurus", alias="DATABASE_URL"
     )
 
     # Redis settings
-    redis_url: str = Field("redis://localhost:6379/0", alias="REDIS_URL")
+    redis_url: str = Field('redis://localhost:6379/0", alias="REDIS_URL')
 
     # Lessonspace settings
     lessonspace_api_key: str = Field(..., alias="LESSONSPACE_API_KEY")

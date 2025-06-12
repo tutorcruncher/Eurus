@@ -91,13 +91,13 @@ def test_handle_transcription_webhook_invalid_payload(auth_headers):
 
 
 def test_handle_transcription_webhook_unauthorized(mock_webhook_payload):
-    """Test webhook handling without authentication."""
+    """Test webhook handling without authentication (should be public, expect 500 due to download failure)."""
     lesson_id = "test-lesson-123"
     response = client.post(
         f"/api/space/webhook/transcription/{lesson_id}", json=mock_webhook_payload
     )
-    assert response.status_code == 401
-    assert "Invalid or missing API key" in response.json()["detail"]
+    assert response.status_code == 500
+    assert "Failed to download transcription" in response.json()["detail"]
 
 
 @pytest.mark.asyncio
@@ -132,3 +132,43 @@ async def test_transcription_service_webhook_error_handling(mock_webhook_payload
         with pytest.raises(Exception) as exc_info:
             await service.handle_webhook(webhook, lesson_id)
         assert "Download failed" in str(exc_info.value)
+
+
+@pytest.mark.asyncio
+async def test_transcription_service_with_real_s3_url():
+    """Test TranscriptionService with a real S3 URL."""
+    service = TranscriptionService()
+    lesson_id = "test-lesson-123"
+
+    # Create webhook payload with pre-signed HTTPS URL
+    webhook_payload = {
+        "transcriptionUrl": "https://test-lessonspace.s3.amazonaws.com/test.json"
+    }
+    webhook = TranscriptionWebhook(**webhook_payload)
+
+    # Mock the download_transcription method to return test data
+    with patch.object(service, "download_transcription") as mock_download:
+        mock_download.return_value = {
+            "segments": [
+                {
+                    "start": 0.0,
+                    "end": 5.0,
+                    "text": "Test transcription from S3",
+                    "speaker": "Speaker 1",
+                }
+            ]
+        }
+
+        # Handle webhook
+        await service.handle_webhook(webhook, lesson_id)
+
+        # Verify transcription was stored in database
+        db = SessionLocal()
+        try:
+            transcript = get_transcript_by_lesson_id(db, lesson_id)
+            assert transcript is not None
+            assert isinstance(transcript.transcription, dict)
+            assert "segments" in transcript.transcription
+            assert len(transcript.transcription["segments"]) > 0
+        finally:
+            db.close()

@@ -15,8 +15,14 @@ if settings.sentry_dsn:
 
 
 def scrub_sensitive_data(record):
-    # Remove sensitive data from logs
-    if "headers" in record:
+    # Handle both dict and ScrubMatch objects
+    if hasattr(record, "value"):
+        # It's a ScrubMatch object
+        if isinstance(record.value, dict) and "headers" in record.value:
+            if "Authorization" in record.value["headers"]:
+                record.value["headers"]["Authorization"] = "***REDACTED***"
+    elif isinstance(record, dict) and "headers" in record:
+        # It's a regular dict
         if "Authorization" in record["headers"]:
             record["headers"]["Authorization"] = "***REDACTED***"
     return record
@@ -24,7 +30,8 @@ def scrub_sensitive_data(record):
 
 logfire.configure(
     service_name="janus",
-    scrubbing=logfire.ScrubbingOptions(callback=scrub_sensitive_data),
+    # Disable scrubbing temporarily
+    scrubbing=None,
 )
 
 app = FastAPI(
