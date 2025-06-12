@@ -1,5 +1,5 @@
 # Janus - LessonSpace Integration Service
-
+````
         ___         ___           ___           ___           ___     
        /\  \       /\  \         /\__\         /\__\         /\  \    
        \:\  \     /::\  \       /::|  |       /:/  /        /::\  \   
@@ -11,6 +11,7 @@
                     /:/  /       |::/  /     \:\/:/  /     \:\/:/  /  
                    /:/  /        /:/  /       \::/  /       \::/  /   
                    \/__/         \/__/         \/__/         \/__/    
+ ````
 
 Named after the Roman god of transitions and doorways, Janus serves as a gateway between tutors and students in virtual learning spaces.
 
