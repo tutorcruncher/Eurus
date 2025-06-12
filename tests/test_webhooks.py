@@ -18,12 +18,9 @@ def mock_transcription_data():
         {
             "start_time": 0.0,
             "end_time": 5.0,
-            "user": {
-                "id": 123,
-                "name": "John Smith"
-            },
+            "user": {"id": 123, "name": "John Smith"},
             "breakout_id": "main",
-            "text": "Hello, this is a test transcription."
+            "text": "Hello, this is a test transcription.",
         }
     ]
 
@@ -154,12 +151,9 @@ async def test_transcription_service_with_real_s3_url():
             {
                 "start_time": 0.0,
                 "end_time": 5.0,
-                "user": {
-                    "id": 123,
-                    "name": "John Smith"
-                },
+                "user": {"id": 123, "name": "John Smith"},
                 "breakout_id": "main",
-                "text": "Test transcription from S3"
+                "text": "Test transcription from S3",
             }
         ]
 

@@ -127,10 +127,12 @@ class TranscriptionService:
 
     def get_transcript(self, lesson_id: str, db: Session) -> Transcript:
         """Get transcript for a lesson by ID."""
-        transcript = db.query(Transcript).filter(Transcript.lesson_id == lesson_id).first()
+        transcript = (
+            db.query(Transcript).filter(Transcript.lesson_id == lesson_id).first()
+        )
         if not transcript:
             raise HTTPException(
                 status_code=404,
-                detail=f"Transcript not found for lesson ID: {lesson_id}"
+                detail=f"Transcript not found for lesson ID: {lesson_id}",
             )
         return transcript

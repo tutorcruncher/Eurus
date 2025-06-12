@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/space", tags=["space"])
 
+
 def get_db():
     db = SessionLocal()
     try:
@@ -38,7 +39,7 @@ async def handle_transcription_webhook(
 async def get_transcript(
     lesson_id: str,
     db: Session = Depends(get_db),
-    service: TranscriptionService = Depends(TranscriptionService)
+    service: TranscriptionService = Depends(TranscriptionService),
 ):
     """Get transcript for a lesson by ID."""
     return service.get_transcript(lesson_id, db)
