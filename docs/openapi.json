@@ -1,0 +1,541 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Lessonspace Service",
+    "description": "Eurus API Documentation",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/space/": {
+      "post": {
+        "tags": [
+          "space"
+        ],
+        "summary": "Create Space",
+        "operationId": "create_space_api_space__post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SpaceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpaceResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/space/webhook/transcription/{lesson_id}": {
+      "post": {
+        "tags": [
+          "space"
+        ],
+        "summary": "Handle Transcription Webhook",
+        "operationId": "handle_transcription_webhook_api_space_webhook_transcription__lesson_id__post",
+        "parameters": [
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Lesson Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TranscriptionWebhook"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/space/transcripts/{lesson_id}": {
+      "get": {
+        "tags": [
+          "space"
+        ],
+        "summary": "Get Transcript",
+        "description": "Get transcript for a lesson by ID.",
+        "operationId": "get_transcript_api_space_transcripts__lesson_id__get",
+        "parameters": [
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Lesson Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TranscriptResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "LeaderUser": {
+        "properties": {
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "User Id",
+            "description": "Unique identifier for the user"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Name of the user"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "email"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email",
+            "description": "Email of the user"
+          },
+          "is_leader": {
+            "type": "boolean",
+            "title": "Is Leader",
+            "description": "Whether the user is a leader",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "name"
+        ],
+        "title": "LeaderUser"
+      },
+      "SpaceRequest": {
+        "properties": {
+          "lesson_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Lesson Id",
+            "description": "Unique identifier for the lesson"
+          },
+          "tutors": {
+            "items": {
+              "$ref": "#/components/schemas/LeaderUser"
+            },
+            "type": "array",
+            "title": "Tutors",
+            "description": "List of tutors participating in the lesson"
+          },
+          "students": {
+            "items": {
+              "$ref": "#/components/schemas/User-Input"
+            },
+            "type": "array",
+            "title": "Students",
+            "description": "List of students participating in the lesson"
+          },
+          "not_before": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Not Before",
+            "description": "Earliest time that users can join the space. If not set, users can join immediately."
+          }
+        },
+        "type": "object",
+        "required": [
+          "lesson_id",
+          "tutors",
+          "students"
+        ],
+        "title": "SpaceRequest"
+      },
+      "SpaceResponse": {
+        "properties": {
+          "space_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Space Id",
+            "description": "Unique identifier for the space"
+          },
+          "lesson_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Lesson Id",
+            "description": "Lesson identifier this space is associated with"
+          },
+          "tutor_spaces": {
+            "items": {
+              "$ref": "#/components/schemas/UserSpace"
+            },
+            "type": "array",
+            "title": "Tutor Spaces",
+            "description": "List of tutor-specific space URLs"
+          },
+          "student_spaces": {
+            "items": {
+              "$ref": "#/components/schemas/UserSpace"
+            },
+            "type": "array",
+            "title": "Student Spaces",
+            "description": "List of student-specific space URLs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "space_id",
+          "lesson_id",
+          "tutor_spaces",
+          "student_spaces"
+        ],
+        "title": "SpaceResponse"
+      },
+      "TranscriptResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "lesson_id": {
+            "type": "string",
+            "title": "Lesson Id"
+          },
+          "transcription": {
+            "items": {
+              "$ref": "#/components/schemas/TranscriptSegment"
+            },
+            "type": "array",
+            "title": "Transcription"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "lesson_id",
+          "transcription",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "TranscriptResponse"
+      },
+      "TranscriptSegment": {
+        "properties": {
+          "start_time": {
+            "type": "number",
+            "title": "Start Time"
+          },
+          "end_time": {
+            "type": "number",
+            "title": "End Time"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User-Output"
+          },
+          "breakout_id": {
+            "type": "string",
+            "title": "Breakout Id"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "start_time",
+          "end_time",
+          "user",
+          "breakout_id",
+          "text"
+        ],
+        "title": "TranscriptSegment"
+      },
+      "TranscriptionWebhook": {
+        "properties": {
+          "transcriptionUrl": {
+            "type": "string",
+            "title": "Transcriptionurl",
+            "description": "Pre-signed S3 URL for downloading the transcription"
+          }
+        },
+        "type": "object",
+        "required": [
+          "transcriptionUrl"
+        ],
+        "title": "TranscriptionWebhook"
+      },
+      "User-Input": {
+        "properties": {
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "User Id",
+            "description": "Unique identifier for the user"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Name of the user"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "email"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email",
+            "description": "Email of the user"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "name"
+        ],
+        "title": "User"
+      },
+      "User-Output": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "User"
+      },
+      "UserSpace": {
+        "properties": {
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "User Id",
+            "description": "Unique identifier for the user"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Name of the user"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role",
+            "description": "Role of the user (tutor/student)"
+          },
+          "space_url": {
+            "type": "string",
+            "title": "Space Url",
+            "description": "Unique space URL for this user"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "name",
+          "role",
+          "space_url"
+        ],
+        "title": "UserSpace"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

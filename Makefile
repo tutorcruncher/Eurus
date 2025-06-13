@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := install
 
-.PHONY: install install-dev format lint test coverage run clean
+.PHONY: install install-dev format lint test coverage run clean docs serve-docs
 
 install:
 	pip install --progress-bar off -U setuptools==57.5.0 pip
@@ -43,3 +43,13 @@ docker-build:
 .PHONY: docker-run
 docker-run:
 	docker run -p 8000:8000 --env-file .env eurus 
+
+.PHONY: docs
+docs:
+	python scripts/generate_docs.py
+
+.PHONY: serve-docs
+serve-docs:
+	@echo "Starting documentation server at http://localhost:8080"
+	@echo "Press Ctrl+C to stop"
+	@python -m http.server 8080 --directory docs 

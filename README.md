@@ -146,3 +146,21 @@ make lint
 - **asyncio**: Parallel API requests for improved performance
 - **Logfire**: Structured logging with sensitive data scrubbing
 - **JWT**: Secure authentication for space access
+
+## API Documentation
+
+The API documentation is automatically generated from the FastAPI application. To generate or update the documentation:
+
+```bash
+make docs
+```
+
+To view the documentation locally:
+
+```bash
+make serve-docs
+```
+
+Then open http://localhost:8080 in your browser.
+
+The documentation is also available at `/docs` when running the application.
