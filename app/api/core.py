@@ -3,18 +3,10 @@ from app.models.space import SpaceRequest, SpaceResponse, TranscriptionWebhook
 from app.services.lessonspace import LessonspaceService
 from app.services.transcription import TranscriptionService, download_transcription
 from app.models.transcript import Transcript, TranscriptResponse
-from app.db.session import SessionLocal
+from app.db.session import SessionLocal, get_db
 from sqlalchemy.orm import Session
 
 router = APIRouter(prefix='/space', tags=['space'])
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @router.post('/', response_model=SpaceResponse)
@@ -29,9 +21,10 @@ async def create_space(
 async def handle_transcription_webhook(
     lesson_id: str,
     webhook: TranscriptionWebhook,
+    db: Session = Depends(get_db),
 ):
     service = TranscriptionService()
-    await service.handle_webhook(webhook, lesson_id)
+    await service.handle_webhook(webhook, lesson_id, db)
     return {'status': 'success'}
 
 

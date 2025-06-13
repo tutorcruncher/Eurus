@@ -88,25 +88,19 @@ class TranscriptionService:
             )
 
     async def handle_webhook(
-        self, webhook: TranscriptionWebhook, lesson_id: str
+        self, webhook: TranscriptionWebhook, lesson_id: str, db: Session
     ) -> None:
         try:
             transcription_data = await self.download_transcription(
                 webhook.transcriptionUrl
             )
-
-            db = SessionLocal()
-            try:
-                transcript = create_transcript(db, lesson_id, transcription_data)
-                logfire.info(
-                    '[TranscriptionService] stored transcription',
-                    lesson_id=lesson_id,
-                    transcript_id=transcript.id,
-                    transcription_length=len(transcription_data),
-                )
-            finally:
-                db.close()
-
+            transcript = create_transcript(db, lesson_id, transcription_data)
+            logfire.info(
+                '[TranscriptionService] stored transcription',
+                lesson_id=lesson_id,
+                transcript_id=transcript.id,
+                transcription_length=len(transcription_data),
+            )
         except Exception as e:
             logfire.error(
                 '[TranscriptionService] error handling webhook',
@@ -118,7 +112,6 @@ class TranscriptionService:
             )
 
     def get_transcript(self, lesson_id: str, db: Session) -> Transcript:
-        """Get transcript for a lesson by ID."""
         transcript = (
             db.query(Transcript).filter(Transcript.lesson_id == lesson_id).first()
         )
