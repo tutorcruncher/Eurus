@@ -24,6 +24,8 @@ A FastAPI service that integrates with LessonSpace to create and manage virtual 
 
 - Create virtual learning spaces with tutor and student access
 - Generate unique, authenticated URLs for each participant
+- Comprehensive API documentation with Swagger UI
+- Automatic documentation generation
 
 ## Prerequisites
 
@@ -70,59 +72,35 @@ Or directly with uvicorn:
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-## API Usage
+## API Documentation
 
-### Create a Space
+The API documentation is automatically generated from the FastAPI application and provides:
 
-```bash
-curl -X POST http://localhost:8000/api/space \
-  -H "Content-Type: application/json" \
-  -d '{
-    "lesson_id": "your-lesson-id",
-    "tutors": [
-      {
-        "name": "Tutor Name",
-        "email": "tutor@example.com",
-        "is_leader": true
-      }
-    ],
-    "students": [
-      {
-        "name": "Student Name",
-        "email": "student@example.com"
-      }
-    ]
-  }'
-```
+- Interactive API documentation with Swagger UI
+- Request/response examples
+- Authentication requirements
+- Schema definitions
+- API endpoints and their parameters
 
-Response:
-```json
-{
-  "space_id": "unique-space-id",
-  "lesson_id": "your-lesson-id",
-  "tutor_spaces": [
-    {
-      "email": "tutor@example.com",
-      "name": "Tutor Name",
-      "role": "tutor",
-      "space_url": "https://thelessonspace.com/space/unique-space-id?token=tutor-jwt-token"
-    }
-  ],
-  "student_spaces": [
-    {
-      "email": "student@example.com",
-      "name": "Student Name",
-      "role": "student",
-      "space_url": "https://thelessonspace.com/space/unique-space-id?token=student-jwt-token"
-    }
-  ]
-}
-```
+### Viewing Documentation
 
-Each participant receives a unique space URL containing their JWT token, which:
-- Authenticates them in the space
-- Sets their role (tutor/student)
-- Controls their permissions (e.g., tutors can lead if is_leader is true)
+There are two ways to access the API documentation:
+
+1. **Live Documentation** (when service is running):
+   - Open http://{BASE_URL}/docs in your browser
+   - This shows the current state of your API
+
+2. **Static Documentation** (for reference/versioning):
+   ```bash
+   # Generate the documentation
+   make docs
+   
+   # View the static documentation
+   make serve-docs
+   ```
+   Then open http://localhost:8080 in your browser
+
+
 
 ## Development
 
@@ -143,24 +121,5 @@ make lint
 ## Architecture
 
 - **FastAPI**: Modern, fast web framework for building APIs
-- **asyncio**: Parallel API requests for improved performance
 - **Logfire**: Structured logging with sensitive data scrubbing
-- **JWT**: Secure authentication for space access
-
-## API Documentation
-
-The API documentation is automatically generated from the FastAPI application. To generate or update the documentation:
-
-```bash
-make docs
-```
-
-To view the documentation locally:
-
-```bash
-make serve-docs
-```
-
-Then open http://localhost:8080 in your browser.
-
-The documentation is also available at `/docs` when running the application.
+- **Swagger UI**: Interactive API documentation
