@@ -13,6 +13,7 @@ settings = get_settings()
 logfire.configure()
 redis_client = Redis.from_url(settings.redis_url)
 
+
 @dataclass
 class LessonSpaceRequest(BaseRequest):
     id: Union[int, str]
@@ -44,7 +45,7 @@ class LessonspaceService:
                 'transcription': {
                     'finish': f'{settings.webhook_base_url}/api/space/webhook/transcription/{lesson_id}'
                 }
-            }
+            },
         )
 
         if not_before:
