@@ -1,13 +1,38 @@
-from fastapi import APIRouter, Depends
-from app.models.space import SpaceRequest, SpaceResponse
+from fastapi import APIRouter, Depends, HTTPException
+from app.models.space import SpaceRequest, SpaceResponse, TranscriptionWebhook
 from app.services.lessonspace import LessonspaceService
+from app.services.transcription import TranscriptionService, download_transcription
+from app.models.transcript import Transcript, TranscriptResponse
+from app.db.session import SessionLocal, get_db
+from sqlalchemy.orm import Session
 
-router = APIRouter(prefix="/space", tags=["space"])
+router = APIRouter(prefix='/api/space', tags=['space'])
 
 
-@router.post("/", response_model=SpaceResponse)
+@router.post('/', response_model=SpaceResponse)
 async def create_space(
     request: SpaceRequest,
     service: LessonspaceService = Depends(LessonspaceService),
 ) -> SpaceResponse:
     return await service.get_or_create_space(request)
+
+
+@router.post('/webhook/transcription/{lesson_id}')
+async def handle_transcription_webhook(
+    lesson_id: str,
+    webhook: TranscriptionWebhook,
+    db: Session = Depends(get_db),
+):
+    service = TranscriptionService()
+    await service.handle_webhook(webhook, lesson_id, db)
+    return {'status': 'success'}
+
+
+@router.get('/transcripts/{lesson_id}', response_model=TranscriptResponse)
+async def get_transcript(
+    lesson_id: str,
+    db: Session = Depends(get_db),
+    service: TranscriptionService = Depends(TranscriptionService),
+):
+    """Get transcript for a lesson by ID."""
+    return service.get_transcript(lesson_id, db)
