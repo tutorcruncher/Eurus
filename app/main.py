@@ -39,7 +39,7 @@ app.middleware('http')(api_key_auth_middleware)
 
 logfire.instrument_fastapi(app)
 
-app.include_router(router, prefix='/api')
+app.include_router(router)
 
 
 @app.get('/health')

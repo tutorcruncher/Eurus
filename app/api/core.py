@@ -6,7 +6,7 @@ from app.models.transcript import Transcript, TranscriptResponse
 from app.db.session import SessionLocal, get_db
 from sqlalchemy.orm import Session
 
-router = APIRouter(prefix='/space', tags=['space'])
+router = APIRouter(prefix='/api/space', tags=['space'])
 
 
 @router.post('/', response_model=SpaceResponse)
