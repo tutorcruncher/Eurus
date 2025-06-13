@@ -38,8 +38,8 @@ clean:
 
 .PHONY: docker-build
 docker-build:
-	docker build -t janus .
+	docker build -t eurus .
 
 .PHONY: docker-run
 docker-run:
-	docker run -p 8000:8000 --env-file .env janus 
+	docker run -p 8000:8000 --env-file .env eurus 

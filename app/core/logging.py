@@ -1,7 +1,7 @@
 import logging
 
 # Configure logging
-logger = logging.getLogger('janus')
+logger = logging.getLogger('eurus')
 logger.setLevel(logging.INFO)
 
 # Create console handler
