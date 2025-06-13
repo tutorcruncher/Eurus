@@ -1,21 +1,22 @@
-# Janus - LessonSpace Integration Service
+# Eurus - LessonSpace Integration Service
 ````
-        ___         ___           ___           ___           ___     
-       /\  \       /\  \         /\__\         /\__\         /\  \    
-       \:\  \     /::\  \       /::|  |       /:/  /        /::\  \   
-   ___ /::\__\   /:/\:\  \     /:|:|  |      /:/  /        /:/\ \  \  
-  /\  /:/\/__/  /::\~\:\  \   /:/|:|  |__   /:/  /  ___   _\:\~\ \  \ 
-  \:\/:/  /    /:/\:\ \:\__\ /:/ |:| /\__\ /:/__/  /\__\ /\ \:\ \ \__\
-   \::/  /     \/__\:\/:/  / \/__|:|/:/  / \:\  \ /:/  / \:\ \:\ \/__/
-    \/__/           \::/  /      |:/:/  /   \:\  /:/  /   \:\ \:\__\  
-                    /:/  /       |::/  /     \:\/:/  /     \:\/:/  /  
-                   /:/  /        /:/  /       \::/  /       \::/  /   
-                   \/__/         \/__/         \/__/         \/__/    
- ````
+     ___           ___           ___           ___           ___     
+    /  /\         /__/\         /  /\         /__/\         /  /\    
+   /  /:/_        \  \:\       /  /::\        \  \:\       /  /:/_   
+  /  /:/ /\        \  \:\     /  /:/\:\        \  \:\     /  /:/ /\  
+ /  /:/ /:/_   ___  \  \:\   /  /:/~/:/    ___  \  \:\   /  /:/ /::\ 
+/__/:/ /:/ /\ /__/\  \__\:\ /__/:/ /:/___ /__/\  \__\:\ /__/:/ /:/\:\
+\  \:\/:/ /:/ \  \:\ /  /:/ \  \:\/:::::/ \  \:\ /  /:/ \  \:\/:/~/:/
+ \  \::/ /:/   \  \:\  /:/   \  \::/~~~~   \  \:\  /:/   \  \::/ /:/ 
+  \  \:\/:/     \  \:\/:/     \  \:\        \  \:\/:/     \__\/ /:/  
+   \  \::/       \  \::/       \  \:\        \  \::/        /__/:/   
+    \__\/         \__\/         \__\/         \__\/         \__\/    
+ 
+````
 
-[![codecov](https://codecov.io/gh/your-username/janus/branch/main/graph/badge.svg)](https://codecov.io/gh/your-username/janus)
+[![codecov](https://codecov.io/gh/your-username/eurus/branch/main/graph/badge.svg)](https://codecov.io/gh/your-username/eurus)
 
-Named after the Roman god of transitions and doorways, Janus serves as a gateway between lesson scheduling and actual virtual lessons,
+Named after the Greek god of the east wind, Eurus serves as a gateway between lesson scheduling and actual virtual lessons,
 
 A FastAPI service that integrates with LessonSpace to create and manage virtual learning spaces.
 
@@ -34,7 +35,7 @@ A FastAPI service that integrates with LessonSpace to create and manage virtual 
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd janus
+cd eurus
 ```
 
 2. Create and activate a virtual environment:
@@ -50,7 +51,7 @@ pip install -r requirements.txt
 
 4. Create a `.env` file in the project root:
 ```env
-APP_NAME=Janus
+APP_NAME=Eurus
 DEBUG=True
 LESSONSPACE_API_KEY=your_api_key_here
 LESSONSPACE_API_URL=https://api.thelessonspace.com/v2

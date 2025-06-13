@@ -26,7 +26,7 @@ def scrub_sensitive_data(record):
 
 
 logfire.configure(
-    service_name='janus',
+    service_name='eurus',
     scrubbing=None,
 )
 
