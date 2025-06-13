@@ -5,29 +5,13 @@ from app.core.config import get_settings
 from app.models.space import SpaceRequest, SpaceResponse, UserSpace
 import asyncio
 from fastapi import HTTPException
-from dataclasses import dataclass, asdict
-from typing import Optional, Dict, Union, Any
+from app.core.dataclass import BaseRequest
+from dataclasses import dataclass
+from typing import Optional, Dict, Union
 
 settings = get_settings()
 logfire.configure()
 redis_client = Redis.from_url(settings.redis_url)
-
-
-@dataclass
-class BaseRequest:
-    def to_dict(self) -> Dict[str, Any]:
-        def _convert_value(value: Any) -> Any:
-            if hasattr(value, 'to_dict'):
-                return value.to_dict()
-            elif isinstance(value, dict):
-                return {k: _convert_value(v) for k, v in value.items() if v is not None}
-            elif isinstance(value, (list, tuple)):
-                return [_convert_value(item) for item in value]
-            return value
-
-        data = asdict(self)
-        return {k: _convert_value(v) for k, v in data.items() if v is not None}
-
 
 @dataclass
 class LessonSpaceRequest(BaseRequest):
