@@ -1,7 +1,7 @@
 import httpx
 from redis import Redis
 import logfire
-from app.core.settings import get_settings
+from settings import get_settings
 from app.schema.space import SpaceRequest, SpaceResponse, UserSpace
 import asyncio
 from fastapi import HTTPException

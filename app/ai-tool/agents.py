@@ -3,7 +3,7 @@ from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPServerStdio
 from pydantic_ai.messages import ModelMessagesTypeAdapter
 
-from app.core.settings import Settings
+from settings import Settings
 from app.models.transcript import Transcript
 
 settings = Settings()

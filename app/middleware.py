@@ -1,6 +1,6 @@
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
-from app.core.settings import get_settings
+from settings import get_settings
 
 settings = get_settings()
 

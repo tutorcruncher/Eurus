@@ -3,7 +3,7 @@ import requests
 import httpx
 from typing import Optional
 from fastapi import HTTPException
-from app.core.settings import get_settings
+from settings import get_settings
 from app.schema.space import TranscriptionWebhook
 from app.dal.transcript import create_transcript
 from app.db.session import SessionLocal

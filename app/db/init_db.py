@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from app.db.base_class import Base
 from app.models.transcript import Transcript
-from app.core.settings import get_settings
+from settings import get_settings
 
 settings = get_settings()
 
