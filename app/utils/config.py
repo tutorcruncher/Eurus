@@ -9,7 +9,7 @@ load_dotenv()
 
 class Settings(BaseSettings):
     app_name: str = Field('Lessonspace Service', alias='APP_NAME')
-    debug: bool = Field(False, alias='DEBUG')
+    dev: bool = Field(False, alias='DEV')
     database_url: str = Field(
         'postgresql://postgres:waffle@localhost:5432/eurus', alias='DATABASE_URL'
     )
