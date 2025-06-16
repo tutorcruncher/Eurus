@@ -89,52 +89,49 @@ async def test_handle_transcription_webhook_success(client, db_session, test_env
 
 @pytest.mark.asyncio
 async def test_get_transcript_success(client, db_session, test_env_vars):
+    from app.models.transcript import Transcript
+    from datetime import datetime
+    import json
+
     lesson_id = 'test-lesson-123'
     now = datetime.now(timezone.utc)
     zulu = now.replace(tzinfo=None).isoformat(timespec='microseconds') + 'Z'
-    mock_transcript = {
-        'id': 1,
-        'lesson_id': lesson_id,
-        'transcription': [
-            {
-                'start_time': 0.0,
-                'end_time': 1.0,
-                'user': {'id': 1, 'name': 'Alice'},
-                'breakout_id': 'main',
-                'text': 'Hello world.',
-            }
-        ],
-        'created_at': zulu,
-        'updated_at': zulu,
-    }
+    transcription_data = [
+        {
+            'start_time': 0.0,
+            'end_time': 1.0,
+            'user': {'id': 1, 'name': 'Alice'},
+            'breakout_id': 'main',
+            'text': 'Hello world.',
+        }
+    ]
+    transcript = Transcript(
+        lesson_id=lesson_id,
+        transcription=transcription_data,
+        created_at=now,
+        updated_at=now,
+    )
+    db_session.add(transcript)
+    db_session.commit()
+    db_session.refresh(transcript)
 
-    with patch(
-        'app.services.transcription.TranscriptionService.get_transcript'
-    ) as mock_get:
-        mock_get.return_value = mock_transcript
-        response = client.get(
-            f'/api/space/transcripts/{lesson_id}', headers={'X-API-Key': 'test'}
-        )
-        assert response.status_code == 200
-        assert response.json() == mock_transcript
+    response = client.get(
+        f'/api/space/transcripts/{lesson_id}', headers={'X-API-Key': 'test'}
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data['lesson_id'] == lesson_id
+    assert data['transcription'][0]['text'] == 'Hello world.'
 
 
 @pytest.mark.asyncio
 async def test_get_transcript_not_found(client, db_session, test_env_vars):
     lesson_id = 'non-existent-lesson'
-
-    with patch(
-        'app.services.transcription.TranscriptionService.get_transcript'
-    ) as mock_get:
-        mock_get.side_effect = HTTPException(
-            status_code=404, detail='Transcript not found'
-        )
-        response = client.get(
-            f'/api/space/transcripts/{lesson_id}', headers={'X-API-Key': 'test'}
-        )
-        assert response.status_code == 404
-        # Accept both custom and default 404 messages
-        assert (
-            'Transcript not found' in response.json().get('detail', '')
-            or response.json().get('detail', '') == 'Not Found'
-        )
+    response = client.get(
+        f'/api/space/transcripts/{lesson_id}', headers={'X-API-Key': 'test'}
+    )
+    assert response.status_code == 404
+    assert (
+        'Transcript not found' in response.json().get('detail', '')
+        or response.json().get('detail', '') == 'Not Found'
+    )

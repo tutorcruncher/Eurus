@@ -74,13 +74,18 @@ async def test_handle_webhook_success(
         await transcription_service.handle_webhook(webhook, lesson_id, db_session)
 
         # Verify transcript was created
-        transcript = transcription_service.get_transcript(lesson_id, db_session)
+        transcript = await transcription_service.get_transcript_by_id(
+            lesson_id, db_session
+        )
         assert transcript is not None
         assert transcript.lesson_id == lesson_id
 
 
-def test_get_transcript_not_found(transcription_service, db_session):
+@pytest.mark.asyncio
+async def test_get_transcript_not_found(transcription_service, db_session):
     with pytest.raises(HTTPException) as exc_info:
-        transcription_service.get_transcript('non-existent-lesson', db_session)
+        await transcription_service.get_transcript_by_id(
+            'non-existent-lesson', db_session
+        )
     assert exc_info.value.status_code == 404
     assert 'Transcript not found' in str(exc_info.value.detail)

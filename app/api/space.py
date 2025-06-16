@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from app.schema.space import SpaceRequest, SpaceResponse, TranscriptionWebhook
 from app.services.lessonspace import LessonspaceService
-from app.services.transcription import TranscriptionService, download_transcription
+from app.services.transcription import TranscriptionService
 from app.models.transcript import Transcript, TranscriptResponse
 from app.db.session import SessionLocal, get_db
 from sqlalchemy.orm import Session
@@ -34,5 +34,4 @@ async def get_transcript(
     db: Session = Depends(get_db),
     service: TranscriptionService = Depends(TranscriptionService),
 ):
-    """Get transcript for a lesson by ID."""
-    return service.get_transcript(lesson_id, db)
+    return await service.get_transcript_by_id(lesson_id, db)

@@ -1,17 +1,16 @@
 import httpx
 from redis import Redis
 import logfire
-from settings import get_settings
+from app.utils.settings import get_settings
 from app.schema.space import SpaceRequest, SpaceResponse, UserSpace
 import asyncio
 from fastapi import HTTPException
-from app.core.dataclass import BaseRequest
+from app.utils.dataclass import BaseRequest
 from dataclasses import dataclass
 from typing import Optional, Dict, Union
+from app.utils.logging import logger
 
 settings = get_settings()
-logfire.configure()
-redis_client = Redis.from_url(settings.redis_url)
 
 
 @dataclass
@@ -103,7 +102,7 @@ class LessonspaceService:
                     student_spaces=student_spaces,
                 )
 
-                logfire.info(
+                logger.info(
                     '[LessonSpaceService] created new space',
                     lesson_id=request.lesson_id,
                     space_id=space_id,
@@ -115,7 +114,7 @@ class LessonspaceService:
                 )
                 return space_response
         except Exception as e:
-            logfire.error(
+            logger.error(
                 '[LessonSpaceService] error in get_or_create_space',
                 lesson_id=request.lesson_id,
                 error=str(e),
