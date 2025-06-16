@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from app.models.space import SpaceRequest, SpaceResponse, TranscriptionWebhook
+from app.schema.space import SpaceRequest, SpaceResponse, TranscriptionWebhook
 from app.services.lessonspace import LessonspaceService
 from app.services.transcription import TranscriptionService, download_transcription
 from app.models.transcript import Transcript, TranscriptResponse

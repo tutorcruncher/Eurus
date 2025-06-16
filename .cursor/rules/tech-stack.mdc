@@ -1,0 +1,10 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+The tech stack for this product:
+
+Framework: FastAPI
+AI Tooling: Pydantic AI
+Coding language: Python

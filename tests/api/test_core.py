@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch, AsyncMock
 from fastapi import HTTPException
-from app.models.space import (
+from app.schema.space import (
     SpaceRequest,
     TranscriptionWebhook,
     LeaderUser,
