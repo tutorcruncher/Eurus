@@ -12,5 +12,6 @@ def create_transcript(db: Session, lesson_id: int, transcription: dict) -> Trans
     db.refresh(transcript)
     return transcript
 
+
 def get_transcript(lesson_id: int, db: Session) -> Transcript:
-        return db.query(Transcript).filter(Transcript.lesson_id == lesson_id).first()
+    return db.query(Transcript).filter(Transcript.lesson_id == lesson_id).first()

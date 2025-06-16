@@ -9,6 +9,8 @@ engine = create_engine(settings.database_url)
 # TODO: Consider adding pooling
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
 def get_db() -> Generator[Session, None, None]:
     db = SessionLocal()
     try:

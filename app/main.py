@@ -21,6 +21,7 @@ def scrub_sensitive_data(record):
             record['headers']['Authorization'] = '***REDACTED***'
     return record
 
+
 app = FastAPI(
     title=settings.app_name,
     debug=settings.dev,

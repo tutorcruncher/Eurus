@@ -8,7 +8,6 @@ except ImportError:
 
 
 class Logger:
-
     def __init__(self, name: str = 'eurus'):
         self.settings = get_settings()
         self.name = name
@@ -16,7 +15,7 @@ class Logger:
 
         if self.use_logfire:
             if not hasattr(logfire, '_configured'):
-                logfire.configure(service_name= 'eurus')
+                logfire.configure(service_name='eurus')
                 logfire._configured = True
         else:
             self.logger = logging.getLogger(name)

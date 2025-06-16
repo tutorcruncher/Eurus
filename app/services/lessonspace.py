@@ -10,6 +10,7 @@ from app.utils.logging import logger
 
 settings = get_settings()
 
+
 @dataclass
 class LessonSpaceRequest(BaseRequest):
     id: Union[int, str]

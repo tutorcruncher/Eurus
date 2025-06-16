@@ -10,6 +10,7 @@ from app.utils.logging import logger
 
 settings = get_settings()
 
+
 class TranscriptionService:
     def __init__(self):
         self.api_key = settings.lessonspace_api_key
@@ -75,7 +76,7 @@ class TranscriptionService:
                 status_code=500, detail='Failed to process transcription: ' + str(e)
             )
 
-    async def get_transcript_by_id(self, lesson_id:int , db: Session) -> Transcript:
+    async def get_transcript_by_id(self, lesson_id: int, db: Session) -> Transcript:
         transcript = get_transcript(lesson_id, db)
         if not transcript:
             raise HTTPException(

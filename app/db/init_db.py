@@ -6,9 +6,11 @@ from app.utils.logging import logger
 
 settings = get_settings()
 
+
 def init_db() -> None:
     engine = create_engine(settings.database_url)
     Base.metadata.create_all(bind=engine)
+
 
 if __name__ == '__main__':
     logger.info('Creating database tables...')
