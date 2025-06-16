@@ -7,7 +7,7 @@ import os
 from app.db.session import get_db
 from app.models.transcript import Base
 from app.main import app
-from app.core.config import get_settings
+from app.utils.config import get_settings
 
 # Create test database
 SQLALCHEMY_DATABASE_URL = os.getenv(

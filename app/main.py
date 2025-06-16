@@ -1,12 +1,9 @@
 import sentry_sdk
-from fastapi import FastAPI, Request, status, Depends, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI
 import logfire
-from app.api.core import router
-from app.core.config import get_settings
+from app.api.space import router
+from app.utils.config import get_settings
 from app.middleware import api_key_auth_middleware
-from app.models.space import TranscriptionWebhook
-from app.services.transcription import TranscriptionService
 
 settings = get_settings()
 
@@ -24,15 +21,9 @@ def scrub_sensitive_data(record):
             record['headers']['Authorization'] = '***REDACTED***'
     return record
 
-
-logfire.configure(
-    service_name='eurus',
-    scrubbing=None,
-)
-
 app = FastAPI(
     title=settings.app_name,
-    debug=settings.debug,
+    debug=settings.dev,
 )
 
 app.middleware('http')(api_key_auth_middleware)
