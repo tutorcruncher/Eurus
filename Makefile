@@ -3,11 +3,10 @@
 .PHONY: install install-dev format lint test coverage run clean docs serve-docs run-worker
 
 install:
-	pip install --progress-bar off -U setuptools==57.5.0 pip
-	pip install --progress-bar off -r requirements.txt
+	uv pip install -e .
 
-install-dev: install
-	pip install --progress-bar off -r requirements.dev.txt
+install-dev:
+	uv pip install -e . --group dev
 
 format:
 	ruff check app/ --fix

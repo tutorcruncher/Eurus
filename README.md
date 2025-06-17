@@ -48,7 +48,14 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 3. Install dependencies:
 ```bash
-pip install -r requirements.txt
+# Make sure you have uv installed (https://docs.astral.sh/uv/)
+curl -Ls https://astral.sh/uv/install.sh | sh
+
+# Runtime dependencies
+uv pip install -e .
+
+# Development extras
+uv pip install -e . --group dev
 ```
 
 4. Create a `.env` file in the project root:
