@@ -7,7 +7,7 @@ import os
 from app.db.session import get_db
 from app.models.transcript import Base
 from app.main import app
-from app.utils.config import get_settings
+from app.utils.settings import get_settings
 
 # Create test database
 SQLALCHEMY_DATABASE_URL = os.getenv(
@@ -55,7 +55,7 @@ def test_env_vars(monkeypatch):
         'TEST_DATABASE_URL': 'postgresql://postgres:waffle@localhost:5432/eurus_test',
         'LESSONSPACE_API_KEY': 'e002ad84-7708-4973-ab27-45d662673127',
         'API_KEY': 'test',
-        'WEBHOOK_BASE_URL': 'http://localhost:8000',
+        'BASE_URL': 'http://localhost:8000',
         'LESSONSPACE_API_URL': 'https://api.thelessonspace.com/v2',
         'SENTRY_DSN': '',
         'LOGFIRE_TOKEN': 'development-disabled',

@@ -1,6 +1,6 @@
 from functools import lru_cache
 import os
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import ConfigDict, Field
 from dotenv import load_dotenv
 
@@ -19,8 +19,8 @@ class Settings(BaseSettings):
         'https://api.thelessonspace.com/v2', alias='LESSONSPACE_API_URL'
     )
     sentry_dsn: str | None = Field(None, alias='SENTRY_DSN')
-    api_key: str = Field(..., alias='API_KEY')
-    webhook_base_url: str = Field(..., alias='WEBHOOK_BASE_URL')
+    api_key: str = Field(default='test-key', alias='API_KEY')
+    base_url: str = Field(default='http://localhost:8000', alias='BASE_URL')
     model_config = ConfigDict(
         extra='allow',
         env_file='.env',
@@ -28,6 +28,10 @@ class Settings(BaseSettings):
         env_prefix='',
         populate_by_name=True,
     )
+
+    ai_model: str = Field(default='openai:gpt-4o', alias='AI_MODEL')
+    openai_api_key: str = Field(default='', alias='OPENAI_API_KEY')
+    model_config = SettingsConfigDict(env_file='.env', extra='allow')
 
 
 @lru_cache()

@@ -1,5 +1,5 @@
 import logging
-from app.utils.config import get_settings
+from app.utils.settings import get_settings
 
 try:
     import logfire

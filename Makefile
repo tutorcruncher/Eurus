@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := install
 
-.PHONY: install install-dev format lint test coverage run clean docs serve-docs
+.PHONY: install install-dev format lint test coverage run clean docs serve-docs run-worker
 
 install:
 	pip install --progress-bar off -U setuptools==57.5.0 pip
@@ -10,10 +10,12 @@ install-dev: install
 	pip install --progress-bar off -r requirements.dev.txt
 
 format:
-	ruff format .
+	ruff check app/ --fix
+	ruff format app/
 
 lint:
-	ruff check .
+	ruff check app/ --fix
+	ruff format app/
 
 test:
 	pytest
@@ -23,6 +25,9 @@ coverage:
 
 run:
 	uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+run-worker:
+	celery -A app.tasks.video_processing.celery_app worker --loglevel=info
 
 clean:
 	rm -rf `find . -name __pycache__`

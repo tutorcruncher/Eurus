@@ -3,7 +3,7 @@ from unittest.mock import patch, AsyncMock, Mock
 from datetime import datetime, timezone
 from fastapi import HTTPException
 from app.services.lessonspace import LessonspaceService
-from app.models.space import SpaceRequest, User, LeaderUser, UserSpace
+from app.schema.space import SpaceRequest, User, LeaderUser, UserSpace
 
 
 @pytest.fixture

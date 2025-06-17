@@ -1,9 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
-from app.models.space import SpaceRequest, SpaceResponse, TranscriptionWebhook
+from fastapi import APIRouter, Depends
+from app.schema.lesson_planning import LessonPlanResponse
+from app.schema.space import SpaceRequest, SpaceResponse, TranscriptionWebhook
+from app.schema.transcript import PostLessonResponse
+from app.services.lesson_planning import LessonPlanService
 from app.services.lessonspace import LessonspaceService
 from app.services.transcription import TranscriptionService
-from app.models.transcript import Transcript, TranscriptResponse
-from app.db.session import SessionLocal, get_db
+from app.schema.transcript import TranscriptResponse
+from app.db.session import get_db
 from sqlalchemy.orm import Session
 
 router = APIRouter(prefix='/api/space', tags=['space'])
@@ -35,3 +38,21 @@ async def get_transcript(
     service: TranscriptionService = Depends(TranscriptionService),
 ):
     return await service.get_transcript_by_id(lesson_id, db)
+
+
+@router.get('/post-lesson/{lesson_id}', response_model=PostLessonResponse)
+async def post_lesson(
+    lesson_id: str,
+    db: Session = Depends(get_db),
+    service: TranscriptionService = Depends(TranscriptionService),
+):
+    return await service.post_lesson(lesson_id, db)
+
+
+@router.post('/create-lesson-plan', response_model=LessonPlanResponse)
+async def create_lesson_plan(
+    lesson_info: dict,
+    db: Session = Depends(get_db),
+    service: LessonPlanService = Depends(LessonPlanService),
+):
+    return await service.create_lesson_plan(lesson_info)

@@ -1,6 +1,6 @@
 import httpx
-from app.utils.config import get_settings
-from app.models.space import SpaceRequest, SpaceResponse, UserSpace
+from app.utils.settings import get_settings
+from app.schema.space import SpaceRequest, SpaceResponse, UserSpace
 import asyncio
 from fastapi import HTTPException
 from app.utils.dataclass import BaseRequest
@@ -40,7 +40,7 @@ class LessonspaceService:
             },
             webhooks={
                 'transcription': {
-                    'finish': f'{settings.webhook_base_url}/api/space/webhook/transcription/{lesson_id}'
+                    'finish': f'{settings.base_url}/api/space/webhook/transcription/{lesson_id}'
                 }
             },
         )
@@ -55,6 +55,8 @@ class LessonspaceService:
         )
         resp.raise_for_status()
         data = resp.json()
+        from devtools import debug
+        debug(data)
         return UserSpace(
             user_id=user.user_id,
             name=user.name,

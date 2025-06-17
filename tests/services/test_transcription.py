@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import patch, AsyncMock, Mock
 from fastapi import HTTPException
 from app.services.transcription import TranscriptionService
-from app.models.space import TranscriptionWebhook
+from app.schema.space import TranscriptionWebhook
 
 
 @pytest.fixture

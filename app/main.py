@@ -1,8 +1,9 @@
 import sentry_sdk
 from fastapi import FastAPI
 import logfire
+from app.utils.settings import get_settings
+from app.middleware import api_key_auth_middleware
 from app.api.space import router
-from app.utils.config import get_settings
 from app.middleware import api_key_auth_middleware
 
 settings = get_settings()
