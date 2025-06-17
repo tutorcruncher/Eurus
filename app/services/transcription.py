@@ -2,14 +2,17 @@ import httpx
 from fastapi import HTTPException
 from app.utils.settings import get_settings
 from app.schema.space import TranscriptionWebhook
-from app.dal.transcript import create_transcript, get_feedback, get_summary
-from app.db.session import SessionLocal
-import logfire
+from app.dal.transcript import (
+    create_feedback,
+    create_summary,
+    create_transcript,
+    get_feedback,
+    get_summary,
+    get_transcript,
+)
 from app.models.transcript import Transcript
-from app.dal.transcript import create_transcript, get_transcript
-from sqlalchemy.orm import Session
+from sqlmodel import Session
 from app.ai_tool.agents import StudentFeedbackAgent, SummaryAgent, TutorFeedbackAgent
-from app.models.transcript import Transcript
 from app.utils.logging import logger
 
 settings = get_settings()
@@ -56,18 +59,6 @@ class TranscriptionService:
                 status_code=500, detail='Failed to download transcription: ' + str(e)
             )
 
-    async def create_summary(self, transcript: Transcript) -> str:
-        summary = SummaryAgent().summarize_lesson(transcript)
-        return summary
-
-    async def create_tutor_feedback(self, transcript: Transcript) -> str:
-        feedback = TutorFeedbackAgent().provide_feedback(transcript)
-        return feedback
-
-    async def create_student_feedback(self, transcript: Transcript) -> str:
-        feedback = StudentFeedbackAgent().provide_feedback(transcript)
-        return feedback
-
     async def handle_webhook(
         self, webhook: TranscriptionWebhook, lesson_id: str, db: Session
     ) -> None:
@@ -91,8 +82,19 @@ class TranscriptionService:
             raise HTTPException(
                 status_code=500, detail='Failed to process transcription: ' + str(e)
             )
+        
+        summary = await SummaryAgent().summarize_lesson(transcript)
+        create_summary(db, transcript.id, summary)
 
-    async def get_transcript_by_id(self, lesson_id: int, db: Session) -> Transcript:
+        user_transcripts = transcript.gather_user_transcripts()
+        for user_id, user_transcript in user_transcripts.items():
+            if user_transcript["role"] == "tutor":
+                tutor_feedback = await TutorFeedbackAgent().provide_feedback_with_str(user_transcript["text"])
+            else:
+                student_feedback = await StudentFeedbackAgent().provide_feedback_with_str(user_transcript["text"])
+            create_feedback(db, transcript.id, user_id, user_transcript["role"], tutor_feedback, student_feedback)
+
+    async def get_transcript_by_id(self, lesson_id: str, db: Session) -> Transcript:
         transcript = get_transcript(lesson_id, db)
         if not transcript:
             raise HTTPException(
@@ -100,7 +102,7 @@ class TranscriptionService:
                 detail=f'Transcript not found for lesson ID: {lesson_id}',
             )
 
-    async def post_lesson(self, lesson_id: int, db: Session) -> dict[str, list]:
+    async def get_lesson_summary(self, lesson_id: str, db: Session) -> dict[str, list]:
         if transcript := get_transcript(lesson_id, db):
             transcript = transcript.transcription
 
@@ -109,8 +111,10 @@ class TranscriptionService:
 
         if feedback := get_feedback(lesson_id, db):
             feedback = {
-                'tutor_feedback': feedback.tutor_feedback,
-                'student_feedback': feedback.student_feedback,
+                'tutor_strengths': feedback.tutor_strengths,
+                'tutor_improvements': feedback.tutor_improvements,
+                'student_strengths': feedback.student_strengths,
+                'student_improvements': feedback.student_improvements,
             }
 
         return {

@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 import os
 
 from app.db.session import get_db
-from app.models.transcript import Base
+from sqlmodel import SQLModel
 from app.main import app
 from app.utils.settings import get_settings
 
@@ -19,13 +19,13 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 
 @pytest.fixture(scope='function')
 def db_session():
-    Base.metadata.create_all(bind=engine)
+    SQLModel.metadata.create_all(bind=engine)
     db = TestingSessionLocal()
     try:
         yield db
     finally:
         db.close()
-        Base.metadata.drop_all(bind=engine)
+        SQLModel.metadata.drop_all(bind=engine)
 
 
 @pytest.fixture(scope='function')

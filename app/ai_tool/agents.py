@@ -46,7 +46,7 @@ class SummaryAgent(BaseAgent):
 
     async def summarize_lesson(self, transcript: Transcript):
         response = await self.get_agent().run(transcript.to_concatonated_transcript())
-        return json.loads(response.output)
+        return response.output
 
 
 class TutorFeedbackAgent(BaseAgent):
@@ -58,6 +58,10 @@ class TutorFeedbackAgent(BaseAgent):
 
     async def provide_feedback(self, transcript: Transcript, user_id: str):
         response = await self.get_agent().run(transcript.get_user_transcript(user_id))
+        return json.loads(response.output)
+    
+    async def provide_feedback_with_str(self, transcript: str):
+        response = await self.get_agent().run(transcript)
         return json.loads(response.output)
 
 
@@ -72,6 +76,9 @@ class StudentFeedbackAgent(BaseAgent):
         response = await self.get_agent().run(transcript.get_user_transcript(user_id))
         return json.loads(response.output)
 
+    async def provide_feedback_with_str(self, transcript: str):
+        response = await self.get_agent().run(transcript)
+        return json.loads(response.output)
 
 class LessonPlanAgent(BaseAgent):
     system_prompt: str = lesson_plan_system_prompt
@@ -80,7 +87,7 @@ class LessonPlanAgent(BaseAgent):
 
     async def create_lesson_plan(self, lesson_info: dict):
         response = await self.get_agent().run(user_prompt=lesson_info.pop('plan'))
-        return json.loads(response.output)
+        return response.output
     
 
 class LessonSequenceAgent(BaseAgent):

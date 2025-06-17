@@ -2,11 +2,13 @@
 
 .PHONY: install install-dev format lint test coverage run clean docs serve-docs run-worker
 
+# Install dependencies (normal packages only)
 install:
-	uv pip install -e .
+	uv sync
 
+# Install dependencies (including dev packages)
 install-dev:
-	uv pip install -e . --group dev
+	uv sync --dev
 
 format:
 	ruff check app/ --fix
@@ -28,6 +30,12 @@ run:
 run-worker:
 	celery -A app.tasks.video_processing.celery_app worker --loglevel=info
 
+
+# Reset database
+reset-db:
+	psql -h localhost -U postgres -c "DROP DATABASE IF EXISTS eurus"
+	psql -h localhost -U postgres -c "CREATE DATABASE eurus"
+
 clean:
 	rm -rf `find . -name __pycache__`
 	rm -f `find . -type f -name '*.py[co]'`
@@ -39,14 +47,6 @@ clean:
 	rm -rf htmlcov
 	rm -f .coverage
 	rm -f .coverage.*
-
-.PHONY: docker-build
-docker-build:
-	docker build -t eurus .
-
-.PHONY: docker-run
-docker-run:
-	docker run -p 8000:8000 --env-file .env eurus 
 
 .PHONY: docs
 docs:

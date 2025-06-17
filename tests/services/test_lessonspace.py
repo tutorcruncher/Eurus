@@ -60,22 +60,24 @@ async def test_create_user_space_success(lessonspace_service, mock_user):
         assert user_space.role == 'tutor'
         assert user_space.space_url == mock_response['client_url']
         assert room_id == mock_response['room_id']
+        assert user_space.leader is True
 
 
 @pytest.mark.asyncio
 async def test_get_or_create_space_success(lessonspace_service, mock_space_request):
-    def user_space_factory(user, role):
+    def user_space_factory(user, role, leader):
         return UserSpace(
             user_id=user.user_id,
             name=user.name,
             role=role,
             space_url=f'https://test.com/{user.user_id}',
+            leader=leader,
         )
 
     async def mock_create_user_space(
         client, lesson_id, user, role, leader, not_before=None
     ):
-        return user_space_factory(user, role), 'test-room-123'
+        return user_space_factory(user, role, leader), 'test-room-123'
 
     with patch.object(
         lessonspace_service, '_create_user_space', side_effect=mock_create_user_space

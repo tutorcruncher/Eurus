@@ -7,6 +7,8 @@ from app.utils.dataclass import BaseRequest
 from dataclasses import dataclass
 from typing import Optional, Dict, Union
 from app.utils.logging import logger
+from sqlmodel import Session, select
+from app.models.transcript import Space as SpaceDB, UserSpace as UserSpaceDB
 
 settings = get_settings()
 
@@ -28,7 +30,13 @@ class LessonspaceService:
         self.headers = {'Authorization': f'Organisation {self.api_key}'}
 
     async def _create_user_space(
-        self, client, lesson_id, user, role, leader, not_before=None
+        self,
+        client,
+        lesson_id,
+        user,
+        role,
+        leader: bool,
+        not_before=None,
     ):
         request = LessonSpaceRequest(
             id=lesson_id,
@@ -55,16 +63,17 @@ class LessonspaceService:
         )
         resp.raise_for_status()
         data = resp.json()
-        from devtools import debug
-        debug(data)
         return UserSpace(
             user_id=user.user_id,
             name=user.name,
             role=role,
             space_url=data['client_url'],
+            leader=leader,
         ), data['room_id']
 
-    async def get_or_create_space(self, request: SpaceRequest) -> SpaceResponse:
+    async def get_or_create_space(
+        self, request: SpaceRequest, db: Optional[Session] = None
+    ) -> SpaceResponse:
         try:
             async with httpx.AsyncClient() as client:
                 tasks = []
@@ -112,6 +121,37 @@ class LessonspaceService:
                     if request.not_before
                     else None,
                 )
+
+                # Persist to database if session provided
+                if db is not None:
+                    # Ensure a Space record exists for this lesson
+                    space_db = db.exec(
+                        select(SpaceDB).where(SpaceDB.lesson_id == request.lesson_id)
+                    ).first()
+                    if space_db is None:
+                        space_db = SpaceDB(lesson_id=request.lesson_id)
+                        db.add(space_db)
+                        db.commit()
+                        db.refresh(space_db)
+
+                    # Create UserSpace records
+                    for us in user_spaces:
+                        existing_us = db.exec(
+                            select(UserSpaceDB)
+                            .where(UserSpaceDB.space_id == space_db.id)
+                            .where(UserSpaceDB.user_id == us.user_id)
+                        ).first()
+                        if existing_us is None:
+                            db.add(
+                                UserSpaceDB(
+                                    user_id=us.user_id,
+                                    role=us.role,
+                                    leader=us.leader,
+                                    space_id=space_db.id,
+                                )
+                            )
+                    db.commit()
+
                 return space_response
         except Exception as e:
             logger.error(

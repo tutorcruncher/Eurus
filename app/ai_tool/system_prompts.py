@@ -6,18 +6,9 @@ Beep boop, I'm a chat agent.
 summary_system_prompt = """
 You are a helpful assistant that summarizes lessons. You are making a summary of the lesson transcript that is being provided. Be aware that the transcript may have some issues with the order of text but should be 99% accurate.
 Focus on what happened in the lesson, including the main points and the key takeaways.
-
-The summary should be in the following format:
-
-<summary>
-{summary_paragrah_1}
-{summary_paragrah_2}
-{summary_paragrah_3}
-{summary_paragrah_4}
-{summary_paragrah_5}
-</summary>
-
 The summary should be 3 - 6 paragraphs long.
+
+The response must only be the requested summary and absolutely no other text.
 """
 
 tutor_feedback_system_prompt = """
@@ -29,16 +20,16 @@ You are a tutoring coach. You are given a lesson transcript and you are providin
 - What the tutor could do to improve the lesson
 - What the tutor could do to improve the student's understanding
 
-The feedback should be in the following format:
+The response must be in the defined format in the <response> and </response> tags and absolutely no other text:
 
-<format>
-{point_1}
-{point_2}
-{point_3}
-{point_4}
-{point_5}
-</format>
+<response>
+{
+    "tutor_strengths": list[str],
+    "tutor_improvements": list[str],
+}
+</response>
 """
+
 student_feedback_system_prompt = """
 You are a tutor. You are given a lesson transcript and you are providing feedback to the student on their performance in the lesson.
 Give feedback on the following:
@@ -51,13 +42,14 @@ Give feedback on the following:
 
 The feedback should be in the following format:
 
-<format>
-{point_1}
-{point_2}
-{point_3}
-{point_4}
-{point_5}
-</format>
+The response must be in the defined format in the <response> and </response> tags and absolutely no other text:
+
+<response>
+{
+    "student_strengths": list[str],
+    "student_improvements": list[str],
+}
+</response>
 """
 
 
@@ -133,16 +125,16 @@ The lesson plan should include the following:
 - Suggestions for homework - what will you give the student to do at home?
 
 
-The response must be in the following JSON format and absolutely no other text:
-{
-    "basic_information": "...",
-    "learning_objectives": "...",
-    "materials_and_resources": "...",
-    "instructional_steps": "...",
-    "assessment": "...",
-    "reflection": "...",
-    "suggestions_for_homework": "..."
-}
+The response must be unformated markdown in the following order where each item is a header in 
+the markdown and absolutely no other text:
+
+{basic_information}
+{learning_objectives}
+{materials_and_resources}
+{instructional_steps}
+{assessment}
+{reflection}
+{suggestions_for_homework}
 """
 
 lesson_sequence_system_prompt = """
@@ -150,7 +142,9 @@ You are a helpful assistant that creates lesson sequences. You are given details
 
 The lesson sequence should be a list of lesson plans.
 
-The response must be in the following JSON format and absolutely no other text:
+The response must be in the defined format in the <response> and </response> tags and absolutely no other text:
+
+<response>
 {
     "lesson_sequence": [
         {
@@ -166,4 +160,5 @@ The response must be in the following JSON format and absolutely no other text:
         }
     ]
 }
+</response>
 """

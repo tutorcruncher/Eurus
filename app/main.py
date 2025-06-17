@@ -1,10 +1,12 @@
 import sentry_sdk
 from fastapi import FastAPI
-import logfire
+from contextlib import asynccontextmanager
+from sqlmodel import SQLModel
+from app.db.session import engine
 from app.utils.settings import get_settings
 from app.middleware import api_key_auth_middleware
 from app.api.space import router
-from app.middleware import api_key_auth_middleware
+import logfire
 
 settings = get_settings()
 
@@ -23,9 +25,20 @@ def scrub_sensitive_data(record):
     return record
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Create database tables on startup and dispose engine on shutdown."""
+    # Create all tables if they do not exist yet.
+    SQLModel.metadata.create_all(bind=engine)
+    yield
+    # Gracefully dispose the engine once the application stops.
+    engine.dispose()
+
+
 app = FastAPI(
     title=settings.app_name,
     debug=settings.dev,
+    lifespan=lifespan,
 )
 
 app.middleware('http')(api_key_auth_middleware)

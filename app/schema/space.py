@@ -32,6 +32,7 @@ class UserSpace(BaseModel):
     name: str = Field(..., description='Name of the user')
     role: str = Field(..., description='Role of the user (tutor/student)')
     space_url: str = Field(..., description='Unique space URL for this user')
+    leader: bool = Field(..., description='Whether the user is a leader')
 
 
 class SpaceResponse(BaseModel):
