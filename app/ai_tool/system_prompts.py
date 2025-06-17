@@ -133,7 +133,7 @@ The lesson plan should include the following:
 - Suggestions for homework - what will you give the student to do at home?
 
 
-The lesson plan must be in the following JSON format:
+The response must be in the following JSON format and absolutely no other text:
 {
     "basic_information": "...",
     "learning_objectives": "...",
@@ -142,5 +142,28 @@ The lesson plan must be in the following JSON format:
     "assessment": "...",
     "reflection": "...",
     "suggestions_for_homework": "..."
+}
+"""
+
+lesson_sequence_system_prompt = """
+You are a helpful assistant that creates lesson sequences. You are given details about a sequence of lessons the tutor wishes to teach. Use the information provided to create a lesson sequence which is a list of lesson plans.
+
+The lesson sequence should be a list of lesson plans.
+
+The response must be in the following JSON format and absolutely no other text:
+{
+    "lesson_sequence": [
+        {
+            "lesson_plan": {
+                "basic_information": "...",
+                "learning_objectives": "...",
+                "materials_and_resources": "...",
+                "instructional_steps": "...",
+                "assessment": "...",
+                "reflection": "...",
+                "suggestions_for_homework": "..."
+            }
+        }
+    ]
 }
 """

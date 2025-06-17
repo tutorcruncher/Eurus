@@ -7,6 +7,7 @@ from app.ai_tool.system_prompts import (
     tutor_feedback_system_prompt,
     student_feedback_system_prompt,
     lesson_plan_system_prompt,
+    lesson_sequence_system_prompt
 )
 
 from app.utils.settings import Settings
@@ -80,4 +81,13 @@ class LessonPlanAgent(BaseAgent):
     async def create_lesson_plan(self, lesson_info: dict):
         response = await self.get_agent().run(user_prompt=lesson_info.pop('plan'))
         return json.loads(response.output)
+    
 
+class LessonSequenceAgent(BaseAgent):
+    system_prompt: str = lesson_sequence_system_prompt
+    name: str = 'Lesson Sequence Agent'
+    description: str = 'A helpful assistant that creates lesson sequences'
+
+    async def create_lesson_sequence(self, lesson_info: dict):
+        response = await self.get_agent().run(user_prompt=lesson_info.pop('sequence'))
+        return json.loads(response.output)

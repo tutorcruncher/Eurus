@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
-from app.schema.lesson_planning import LessonPlanResponse
+from app.schema.lesson_planning import LessonPlanResponse, LessonSequenceResponse
 from app.schema.space import SpaceRequest, SpaceResponse, TranscriptionWebhook
 from app.schema.transcript import PostLessonResponse
-from app.services.lesson_planning import LessonPlanService
+from app.services.lesson_planning import LessonPlanService, LessonSequenceService
 from app.services.lessonspace import LessonspaceService
 from app.services.transcription import TranscriptionService
 from app.schema.transcript import TranscriptResponse
@@ -56,3 +56,12 @@ async def create_lesson_plan(
     service: LessonPlanService = Depends(LessonPlanService),
 ):
     return await service.create_lesson_plan(lesson_info)
+
+
+@router.post('/create-lesson-sequence', response_model=LessonSequenceResponse)
+async def create_lesson_sequence(
+    lesson_info: dict,
+    db: Session = Depends(get_db),
+    service: LessonSequenceService = Depends(LessonSequenceService),
+):
+    return await service.create_lesson_sequence(lesson_info)

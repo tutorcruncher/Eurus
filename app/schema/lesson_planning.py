@@ -9,3 +9,7 @@ class LessonPlanResponse(BaseModel):
     assessment: str
     reflection: str
     suggestions_for_homework: str
+
+
+class LessonSequenceResponse(BaseModel):
+    lesson_plans: list[LessonPlanResponse]
