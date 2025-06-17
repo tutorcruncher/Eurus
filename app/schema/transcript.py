@@ -16,13 +16,21 @@ class TranscriptSegment(BaseModel):
     breakout_id: str
     text: str
 
+class Transcript(BaseModel):
+    transcription: List[TranscriptSegment]
+
 
 class TranscriptResponse(BaseModel):
     id: int
     lesson_id: str
-    transcription: List[TranscriptSegment]
+    transcription: Transcript
     created_at: datetime
     updated_at: datetime
 
     class Config:
         from_attributes = True
+
+class PostLessonResponse(BaseModel):
+    transcript: Transcript
+    summary: str
+    feedback: Dict[str, str]

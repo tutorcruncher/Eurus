@@ -2,13 +2,13 @@ import httpx
 from fastapi import HTTPException
 from app.utils.settings import get_settings
 from app.schema.space import TranscriptionWebhook
-from app.dal.transcript import create_transcript
+from app.dal.transcript import create_transcript, get_feedback, get_summary
 from app.db.session import SessionLocal
 import logfire
 from app.models.transcript import Transcript
 from app.dal.transcript import create_transcript, get_transcript
 from sqlalchemy.orm import Session
-
+from app.ai_tool.agents import StudentFeedbackAgent, SummaryAgent, TutorFeedbackAgent
 from app.models.transcript import Transcript
 from app.utils.logging import logger
 
@@ -55,6 +55,18 @@ class TranscriptionService:
             raise HTTPException(
                 status_code=500, detail='Failed to download transcription: ' + str(e)
             )
+        
+    async def create_summary(self, transcript: Transcript) -> str:
+        summary = SummaryAgent().summarize_lesson(transcript)
+        return summary
+    
+    async def create_tutor_feedback(self, transcript: Transcript) -> str:
+        feedback = TutorFeedbackAgent().provide_feedback(transcript)
+        return feedback
+    
+    async def create_student_feedback(self, transcript: Transcript) -> str:
+        feedback = StudentFeedbackAgent().provide_feedback(transcript)
+        return feedback
 
     async def handle_webhook(
         self, webhook: TranscriptionWebhook, lesson_id: str, db: Session
@@ -87,5 +99,23 @@ class TranscriptionService:
                 status_code=404,
                 detail=f'Transcript not found for lesson ID: {lesson_id}',
             )
+        
 
-        return transcript
+    async def post_lesson(self, lesson_id: int, db: Session) -> dict[str, list]:
+        if transcript := get_transcript(lesson_id, db):
+            transcript = transcript.transcription
+
+        if summary := get_summary(lesson_id, db):
+            summary = summary.main_text
+
+        if feedback := get_feedback(lesson_id, db):
+            feedback = {
+                'tutor_feedback': feedback.tutor_feedback,
+                'student_feedback': feedback.student_feedback,
+            }
+
+        return {
+            'transcript': transcript,
+            'summary': summary,
+            'feedback': feedback,
+        }

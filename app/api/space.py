@@ -35,3 +35,12 @@ async def get_transcript(
     service: TranscriptionService = Depends(TranscriptionService),
 ):
     return await service.get_transcript_by_id(lesson_id, db)
+
+
+@router.get('/post-lesson/{lesson_id}', response_model=PostLessonResponse)
+async def post_lesson(
+    lesson_id: str,
+    db: Session = Depends(get_db),
+    service: TranscriptionService = Depends(TranscriptionService),
+):
+    return await service.post_lesson(lesson_id, db)
