@@ -74,9 +74,10 @@ class StudentFeedbackAgent(BaseAgent):
 
 class LessonPlanAgent(BaseAgent):
     system_prompt: str = lesson_plan_system_prompt
-    name: str = 'Lesson Plan Agent'
+    name: str = 'Lesson Planning Agent'
     description: str = 'A helpful assistant that creates lesson plans'
 
     async def create_lesson_plan(self, lesson_info: dict):
         response = await self.get_agent().run(user_prompt=lesson_info.pop('plan'))
         return json.loads(response.output)
+
