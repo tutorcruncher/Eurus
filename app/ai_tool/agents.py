@@ -5,6 +5,7 @@ from app.ai_tool.system_prompts import (
     summary_system_prompt,
     tutor_feedback_system_prompt,
     student_feedback_system_prompt,
+    lesson_plan_system_prompt,
 )
 
 from app.utils.settings import Settings
@@ -62,3 +63,12 @@ class StudentFeedbackAgent(BaseAgent):
 
     def provide_feedback(self, transcript: Transcript, user_id: str):
         return self.get_agent().run(transcript.get_user_transcript(user_id))
+
+
+class LessonPlanAgent(BaseAgent):
+    system_prompt: str = lesson_plan_system_prompt
+    name: str = 'Lesson Plan Agent'
+    description: str = 'A helpful assistant that creates lesson plans'
+
+    def create_lesson_plan(self, lesson_info: dict):
+        return self.get_agent().run(lesson_info)

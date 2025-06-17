@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from app.schema.space import SpaceRequest, SpaceResponse, TranscriptionWebhook
 from app.schema.transcript import PostLessonResponse
+from app.services.lesson_planning import LessonPlanService
 from app.services.lessonspace import LessonspaceService
 from app.services.transcription import TranscriptionService
 from app.models.transcript import Transcript, TranscriptResponse
@@ -45,3 +46,12 @@ async def post_lesson(
     service: TranscriptionService = Depends(TranscriptionService),
 ):
     return await service.post_lesson(lesson_id, db)
+
+
+@router.post('/create-lesson-plan', response_model=LessonPlanResponse)
+async def create_lesson_plan(
+    lesson_info: dict,
+    db: Session = Depends(get_db),
+    service: LessonPlanService = Depends(LessonPlanService),
+):
+    return await service.create_lesson_plan(lesson_info, db)
