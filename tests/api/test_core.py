@@ -122,6 +122,7 @@ async def test_get_transcript_success(client, db_session, test_env_vars):
     data = response.json()
     assert data['lesson_id'] == lesson_id
     assert data['transcription'][0]['text'] == 'Hello world.'
+    assert 'updated_at' in data
 
 
 @pytest.mark.asyncio

@@ -11,7 +11,8 @@ class Transcript(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
     lesson_id: str = Field(index=True, nullable=False)
     transcription: Optional[dict] = Field(nullable=True, sa_type=JSONB)
-    created_at: datetime = Field(default=datetime.utcnow, nullable=False)
+    created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
+    updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
 
     def __repr__(self):
         return f'<Transcript(lesson_id={self.lesson_id}, created_at={self.created_at})>'
@@ -36,7 +37,7 @@ class Summary(SQLModel, table=True):
     main_text: str = Field(nullable=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
-    transcript_id: int = Field(foreign_key='transcript.id', nullable=False)
+    transcript_id: int = Field(foreign_key='transcripts.id', nullable=False)
 
 
 class Feedback(SQLModel, table=True):
@@ -47,4 +48,4 @@ class Feedback(SQLModel, table=True):
     student_feedback: str = Field(nullable=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
-    transcript_id: int = Field(foreign_key='transcript.id', nullable=False)
+    transcript_id: int = Field(foreign_key='transcripts.id', nullable=False)

@@ -99,6 +99,7 @@ class TranscriptionService:
                 status_code=404,
                 detail=f'Transcript not found for lesson ID: {lesson_id}',
             )
+        return transcript
 
     async def post_lesson(self, lesson_id: int, db: Session) -> dict[str, list]:
         if transcript := get_transcript(lesson_id, db):

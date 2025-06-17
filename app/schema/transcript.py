@@ -24,12 +24,19 @@ class Transcript(BaseModel):
 class TranscriptResponse(BaseModel):
     id: int
     lesson_id: str
-    transcription: Transcript
+    transcription: List[
+        TranscriptSegment
+    ]  # Changed from Transcript to List[TranscriptSegment]
     created_at: datetime
     updated_at: datetime
 
     class Config:
         from_attributes = True
+        json_encoders = {
+            datetime: lambda v: v.isoformat() + 'Z'
+            if v.tzinfo is None
+            else v.isoformat()
+        }
 
 
 class PostLessonResponse(BaseModel):

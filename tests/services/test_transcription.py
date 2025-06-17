@@ -12,16 +12,43 @@ def transcription_service(settings):
 
 @pytest.fixture
 def mock_transcription_data():
-    return {
-        'text': 'This is a test transcription',
-        'words': [
-            {'word': 'This', 'start': 0.0, 'end': 0.5},
-            {'word': 'is', 'start': 0.5, 'end': 1.0},
-            {'word': 'a', 'start': 1.0, 'end': 1.5},
-            {'word': 'test', 'start': 1.5, 'end': 2.0},
-            {'word': 'transcription', 'start': 2.0, 'end': 2.5},
-        ],
-    }
+    return [
+        {
+            'start_time': 0.0,
+            'end_time': 0.5,
+            'user': {'id': 1, 'name': 'Test User'},
+            'breakout_id': 'main',
+            'text': 'This'
+        },
+        {
+            'start_time': 0.5,
+            'end_time': 1.0,
+            'user': {'id': 1, 'name': 'Test User'},
+            'breakout_id': 'main',
+            'text': 'is'
+        },
+        {
+            'start_time': 1.0,
+            'end_time': 1.5,
+            'user': {'id': 1, 'name': 'Test User'},
+            'breakout_id': 'main',
+            'text': 'a'
+        },
+        {
+            'start_time': 1.5,
+            'end_time': 2.0,
+            'user': {'id': 1, 'name': 'Test User'},
+            'breakout_id': 'main',
+            'text': 'test'
+        },
+        {
+            'start_time': 2.0,
+            'end_time': 2.5,
+            'user': {'id': 1, 'name': 'Test User'},
+            'breakout_id': 'main',
+            'text': 'transcription'
+        }
+    ]
 
 
 @pytest.mark.asyncio
