@@ -55,6 +55,8 @@ class LessonspaceService:
         )
         resp.raise_for_status()
         data = resp.json()
+        from devtools import debug
+        debug(data)
         return UserSpace(
             user_id=user.user_id,
             name=user.name,
