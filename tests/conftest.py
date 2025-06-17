@@ -55,7 +55,7 @@ def test_env_vars(monkeypatch):
         'TEST_DATABASE_URL': 'postgresql://postgres:waffle@localhost:5432/eurus_test',
         'LESSONSPACE_API_KEY': 'e002ad84-7708-4973-ab27-45d662673127',
         'API_KEY': 'test',
-        'WEBHOOK_BASE_URL': 'http://localhost:8000',
+        'BASE_URL': 'http://localhost:8000',
         'LESSONSPACE_API_URL': 'https://api.thelessonspace.com/v2',
         'SENTRY_DSN': '',
         'LOGFIRE_TOKEN': 'development-disabled',

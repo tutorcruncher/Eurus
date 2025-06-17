@@ -1,6 +1,4 @@
 import httpx
-from redis import Redis
-import logfire
 from app.utils.settings import get_settings
 from app.schema.space import SpaceRequest, SpaceResponse, UserSpace
 import asyncio
@@ -42,7 +40,7 @@ class LessonspaceService:
             },
             webhooks={
                 'transcription': {
-                    'finish': f'{settings.webhook_base_url}/api/space/webhook/transcription/{lesson_id}'
+                    'finish': f'{settings.base_url}/api/space/webhook/transcription/{lesson_id}'
                 }
             },
         )

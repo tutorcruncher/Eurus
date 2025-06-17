@@ -133,8 +133,7 @@ The lesson plan should include the following:
 - Suggestions for homework - what will you give the student to do at home?
 
 
-The lesson plan should be in the following JSON format:
-
+The lesson plan must be in the following JSON format:
 {
     "basic_information": "...",
     "learning_objectives": "...",

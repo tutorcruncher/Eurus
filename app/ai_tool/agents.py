@@ -1,3 +1,4 @@
+import json
 from dotenv import load_dotenv
 from pydantic_ai import Agent
 from app.ai_tool.system_prompts import (
@@ -21,9 +22,12 @@ class BaseAgent:
     """Chat agent using pydantic-ai"""
 
     system_prompt: str = base_system_prompt
-    model_name: str = settings.AI_MODEL
+    model_name: str
     name: str = 'The agent'
     description: str = 'A helpful chat assistant'
+
+    def __init__(self):
+        self.model_name = settings.ai_model
 
     def get_agent(self):
         return Agent(
@@ -39,8 +43,8 @@ class SummaryAgent(BaseAgent):
     name: str = 'Summary Agent'
     description: str = 'A helpful assistant that summarizes lessons'
 
-    def summarize_lesson(self, transcript: Transcript):
-        return self.get_agent().run(transcript.to_concatonated_transcript())
+    async def summarize_lesson(self, transcript: Transcript):
+        return await self.get_agent().run(transcript.to_concatonated_transcript())
 
 
 class TutorFeedbackAgent(BaseAgent):
@@ -50,8 +54,8 @@ class TutorFeedbackAgent(BaseAgent):
         'A helpful assistant that provides feedback on lessons to the tutor'
     )
 
-    def provide_feedback(self, transcript: Transcript, user_id: str):
-        return self.get_agent().run(transcript.get_user_transcript(user_id))
+    async def provide_feedback(self, transcript: Transcript, user_id: str):
+        return await self.get_agent().run(transcript.get_user_transcript(user_id))
 
 
 class StudentFeedbackAgent(BaseAgent):
@@ -61,8 +65,8 @@ class StudentFeedbackAgent(BaseAgent):
         'A helpful assistant that provides feedback on lessons to the student'
     )
 
-    def provide_feedback(self, transcript: Transcript, user_id: str):
-        return self.get_agent().run(transcript.get_user_transcript(user_id))
+    async def provide_feedback(self, transcript: Transcript, user_id: str):
+        return await self.get_agent().run(transcript.get_user_transcript(user_id))
 
 
 class LessonPlanAgent(BaseAgent):
@@ -70,5 +74,6 @@ class LessonPlanAgent(BaseAgent):
     name: str = 'Lesson Plan Agent'
     description: str = 'A helpful assistant that creates lesson plans'
 
-    def create_lesson_plan(self, lesson_info: dict):
-        return self.get_agent().run(lesson_info)
+    async def create_lesson_plan(self, lesson_info: dict):
+        ree = await self.get_agent().run(user_prompt=lesson_info.pop('plan'))
+        return json.loads(ree.output)

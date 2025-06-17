@@ -12,9 +12,6 @@ class Transcript(SQLModel, table=True):
     lesson_id: str = Field(index=True, nullable=False)
     transcription: Optional[dict] = Field(nullable=True, sa_type=JSONB)
     created_at: datetime = Field(default=datetime.utcnow, nullable=False)
-    updated_at: datetime = Field(
-        default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
-    )
 
     def __repr__(self):
         return f'<Transcript(lesson_id={self.lesson_id}, created_at={self.created_at})>'
