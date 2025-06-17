@@ -55,15 +55,15 @@ class TranscriptionService:
             raise HTTPException(
                 status_code=500, detail='Failed to download transcription: ' + str(e)
             )
-        
+
     async def create_summary(self, transcript: Transcript) -> str:
         summary = SummaryAgent().summarize_lesson(transcript)
         return summary
-    
+
     async def create_tutor_feedback(self, transcript: Transcript) -> str:
         feedback = TutorFeedbackAgent().provide_feedback(transcript)
         return feedback
-    
+
     async def create_student_feedback(self, transcript: Transcript) -> str:
         feedback = StudentFeedbackAgent().provide_feedback(transcript)
         return feedback
@@ -99,7 +99,6 @@ class TranscriptionService:
                 status_code=404,
                 detail=f'Transcript not found for lesson ID: {lesson_id}',
             )
-        
 
     async def post_lesson(self, lesson_id: int, db: Session) -> dict[str, list]:
         if transcript := get_transcript(lesson_id, db):

@@ -16,6 +16,7 @@ class TranscriptSegment(BaseModel):
     breakout_id: str
     text: str
 
+
 class Transcript(BaseModel):
     transcription: List[TranscriptSegment]
 
@@ -29,6 +30,7 @@ class TranscriptResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
 
 class PostLessonResponse(BaseModel):
     transcript: Transcript
