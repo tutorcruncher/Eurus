@@ -14,5 +14,6 @@ from pydantic import BaseModel
 class LessonPlanResponse(BaseModel):
     lesson_plan: str
 
+
 class LessonSequenceResponse(BaseModel):
     lesson_plans: list[LessonPlanResponse]

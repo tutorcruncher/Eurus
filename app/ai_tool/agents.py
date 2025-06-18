@@ -7,7 +7,7 @@ from app.ai_tool.system_prompts import (
     tutor_feedback_system_prompt,
     student_feedback_system_prompt,
     lesson_plan_system_prompt,
-    lesson_sequence_system_prompt
+    lesson_sequence_system_prompt,
 )
 
 from app.utils.settings import Settings
@@ -59,7 +59,7 @@ class TutorFeedbackAgent(BaseAgent):
     async def provide_feedback(self, transcript: Transcript, user_id: str):
         response = await self.get_agent().run(transcript.get_user_transcript(user_id))
         return json.loads(response.output)
-    
+
     async def provide_feedback_with_str(self, transcript: str):
         response = await self.get_agent().run(transcript)
         return json.loads(response.output)
@@ -80,6 +80,7 @@ class StudentFeedbackAgent(BaseAgent):
         response = await self.get_agent().run(transcript)
         return json.loads(response.output)
 
+
 class LessonPlanAgent(BaseAgent):
     system_prompt: str = lesson_plan_system_prompt
     name: str = 'Lesson Planning Agent'
@@ -88,7 +89,7 @@ class LessonPlanAgent(BaseAgent):
     async def create_lesson_plan(self, lesson_info: dict):
         response = await self.get_agent().run(user_prompt=lesson_info.pop('plan'))
         return response.output
-    
+
 
 class LessonSequenceAgent(BaseAgent):
     system_prompt: str = lesson_sequence_system_prompt

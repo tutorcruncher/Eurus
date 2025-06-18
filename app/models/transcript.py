@@ -8,7 +8,11 @@ from sqlalchemy.dialects.postgresql import JSONB
 class Space(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     lesson_id: str = Field(index=True, nullable=False)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), nullable=False)
+    lesson_space_id: str = Field(nullable=False)
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc), nullable=False
+    )
+
 
 class UserSpace(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -16,12 +20,17 @@ class UserSpace(SQLModel, table=True):
     role: str = Field(nullable=False)
     leader: bool = Field(nullable=False)
     space_id: int = Field(foreign_key='space.id', nullable=False)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), nullable=False)
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc), nullable=False
+    )
+
 
 class Transcript(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     transcription: Optional[list[dict]] = Field(nullable=True, sa_type=JSONB)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), nullable=False)
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc), nullable=False
+    )
 
     space_id: int = Field(foreign_key='space.id', nullable=False)
 
@@ -39,20 +48,20 @@ class Transcript(SQLModel, table=True):
                 if segment['user']['id'] == user_id
             ]
         )
-    
+
     def gather_user_transcripts(self) -> dict[int, dict[str, str]]:
         user_transcripts = {}
         for segment in self.transcription:
-            user_id = segment["user"]["id"]
-            text = segment["text"]
-            role = segment["user"]["role"]
+            user_id = segment['user']['id']
+            text = segment['text']
+            role = segment['user']['role']
             if user_id not in user_transcripts:
                 user_transcripts[user_id] = {
-                    "role": role,
-                    "text": text,
+                    'role': role,
+                    'text': text,
                 }
             else:
-                user_transcripts[user_id]["text"] += " " + text
+                user_transcripts[user_id]['text'] += ' ' + text
         return user_transcripts
 
 

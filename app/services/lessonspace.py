@@ -1,4 +1,5 @@
 import httpx
+from app.dal.transcript import create_or_update_user_space, get_or_create_space
 from app.utils.settings import get_settings
 from app.schema.space import SpaceRequest, SpaceResponse, UserSpace
 import asyncio
@@ -30,14 +31,11 @@ class LessonspaceService:
         self.headers = {'Authorization': f'Organisation {self.api_key}'}
 
     async def _create_user_space(
-        self,
-        client,
-        lesson_id,
-        user,
-        role,
-        leader: bool,
-        not_before=None,
+        self, db, client, lesson_id, user, role, leader: bool, not_before=None
     ):
+        from devtools import debug
+
+        debug('reee')
         request = LessonSpaceRequest(
             id=lesson_id,
             user={
@@ -52,6 +50,7 @@ class LessonspaceService:
                 }
             },
         )
+        debug(request)
 
         if not_before:
             request.timeouts = {'not_before': not_before.isoformat()}
@@ -63,6 +62,15 @@ class LessonspaceService:
         )
         resp.raise_for_status()
         data = resp.json()
+
+        debug(data)
+
+        debug(1)
+        space = get_or_create_space(db, lesson_id, data['room_id'])
+        debug(2)
+        create_or_update_user_space(db, user.user_id, space.id, role, leader)
+        debug(3)
+
         return UserSpace(
             user_id=user.user_id,
             name=user.name,
@@ -80,6 +88,7 @@ class LessonspaceService:
                 for tutor in request.tutors:
                     tasks.append(
                         self._create_user_space(
+                            db,
                             client,
                             request.lesson_id,
                             tutor,
@@ -91,6 +100,7 @@ class LessonspaceService:
                 for student in request.students:
                     tasks.append(
                         self._create_user_space(
+                            db,
                             client,
                             request.lesson_id,
                             student,
@@ -121,36 +131,6 @@ class LessonspaceService:
                     if request.not_before
                     else None,
                 )
-
-                # Persist to database if session provided
-                if db is not None:
-                    # Ensure a Space record exists for this lesson
-                    space_db = db.exec(
-                        select(SpaceDB).where(SpaceDB.lesson_id == request.lesson_id)
-                    ).first()
-                    if space_db is None:
-                        space_db = SpaceDB(lesson_id=request.lesson_id)
-                        db.add(space_db)
-                        db.commit()
-                        db.refresh(space_db)
-
-                    # Create UserSpace records
-                    for us in user_spaces:
-                        existing_us = db.exec(
-                            select(UserSpaceDB)
-                            .where(UserSpaceDB.space_id == space_db.id)
-                            .where(UserSpaceDB.user_id == us.user_id)
-                        ).first()
-                        if existing_us is None:
-                            db.add(
-                                UserSpaceDB(
-                                    user_id=us.user_id,
-                                    role=us.role,
-                                    leader=us.leader,
-                                    space_id=space_db.id,
-                                )
-                            )
-                    db.commit()
 
                 return space_response
         except Exception as e:

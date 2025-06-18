@@ -82,17 +82,30 @@ class TranscriptionService:
             raise HTTPException(
                 status_code=500, detail='Failed to process transcription: ' + str(e)
             )
-        
+
         summary = await SummaryAgent().summarize_lesson(transcript)
         create_summary(db, transcript.id, summary)
 
         user_transcripts = transcript.gather_user_transcripts()
         for user_id, user_transcript in user_transcripts.items():
-            if user_transcript["role"] == "tutor":
-                tutor_feedback = await TutorFeedbackAgent().provide_feedback_with_str(user_transcript["text"])
+            if user_transcript['role'] == 'tutor':
+                tutor_feedback = await TutorFeedbackAgent().provide_feedback_with_str(
+                    user_transcript['text']
+                )
             else:
-                student_feedback = await StudentFeedbackAgent().provide_feedback_with_str(user_transcript["text"])
-            create_feedback(db, transcript.id, user_id, user_transcript["role"], tutor_feedback, student_feedback)
+                student_feedback = (
+                    await StudentFeedbackAgent().provide_feedback_with_str(
+                        user_transcript['text']
+                    )
+                )
+            create_feedback(
+                db,
+                transcript.id,
+                user_id,
+                user_transcript['role'],
+                tutor_feedback,
+                student_feedback,
+            )
 
     async def get_transcript_by_id(self, lesson_id: str, db: Session) -> Transcript:
         transcript = get_transcript(lesson_id, db)

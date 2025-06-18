@@ -11,6 +11,7 @@ engine = create_engine(settings.database_url, echo=settings.dev)
 
 # TODO: Consider adding pooling
 
+
 def get_db() -> Generator[Session, None, None]:
     """FastAPI dependency that provides a SQLModel-aware session."""
     with Session(engine) as session:
