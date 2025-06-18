@@ -8,8 +8,7 @@ from app.utils.dataclass import BaseRequest
 from dataclasses import dataclass
 from typing import Optional, Dict, Union
 from app.utils.logging import logger
-from sqlmodel import Session, select
-from app.models.transcript import Space as SpaceDB, UserSpace as UserSpaceDB
+from sqlmodel import Session
 
 settings = get_settings()
 
@@ -60,8 +59,7 @@ class LessonspaceService:
         data = resp.json()
 
         space = get_or_create_space(db, lesson_id, data['room_id'])
-        create_or_update_user_space(db, user.user_id, space.id, role, leader)
-
+        create_or_update_user_space(db, user.user_id, lesson_id, role, leader)
         return UserSpace(
             user_id=user.user_id,
             name=user.name,
@@ -102,9 +100,16 @@ class LessonspaceService:
                     )
                 results = await asyncio.gather(*tasks)
                 user_spaces, room_ids = zip(*results)
+                from devtools import debug
+
+                debug(user_spaces)
+                debug(room_ids)
                 tutor_spaces = [us for us in user_spaces if us.role == 'tutor']
                 student_spaces = [us for us in user_spaces if us.role == 'student']
                 space_id = room_ids[0] if room_ids else None
+                from devtools import debug
+
+                debug(space_id)
                 space_response = SpaceResponse(
                     space_id=space_id,
                     lesson_id=request.lesson_id,
@@ -130,6 +135,9 @@ class LessonspaceService:
                 lesson_id=request.lesson_id,
                 error=str(e),
             )
+            from devtools import debug
+
+            debug(e)
             raise HTTPException(
                 status_code=500, detail='Internal server error: ' + str(e)
             )

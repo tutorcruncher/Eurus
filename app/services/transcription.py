@@ -9,10 +9,16 @@ from app.dal.transcript import (
     get_feedback,
     get_summary,
     get_transcript,
+    get_user_spaces,
 )
 from app.models.transcript import Transcript
 from sqlmodel import Session
-from app.ai_tool.agents import StudentFeedbackAgent, SummaryAgent, TutorFeedbackAgent
+from app.ai_tool.agents import (
+    ChapterAgent,
+    StudentFeedbackAgent,
+    SummaryAgent,
+    TutorFeedbackAgent,
+)
 from app.utils.logging import logger
 
 settings = get_settings()
@@ -84,27 +90,27 @@ class TranscriptionService:
             )
 
         summary = await SummaryAgent().summarize_lesson(transcript)
-        create_summary(db, transcript.id, summary)
+        create_summary(db, lesson_id, summary)
 
-        user_transcripts = transcript.gather_user_transcripts()
+        users = get_user_spaces(lesson_id, db)
+        users_lookup = {user.user_id: user for user in users}
+        user_transcripts = transcript.gather_user_transcripts(users_lookup)
+
         for user_id, user_transcript in user_transcripts.items():
             if user_transcript['role'] == 'tutor':
-                tutor_feedback = await TutorFeedbackAgent().provide_feedback_with_str(
-                    user_transcript['text']
-                )
+                agent = TutorFeedbackAgent()
             else:
-                student_feedback = (
-                    await StudentFeedbackAgent().provide_feedback_with_str(
-                        user_transcript['text']
-                    )
-                )
+                agent = StudentFeedbackAgent()
+            strengths, improvements = await agent.provide_feedback_with_str(
+                user_transcript['text']
+            )
             create_feedback(
                 db,
-                transcript.id,
+                lesson_id,
                 user_id,
                 user_transcript['role'],
-                tutor_feedback,
-                student_feedback,
+                strengths,
+                improvements,
             )
 
     async def get_transcript_by_id(self, lesson_id: str, db: Session) -> Transcript:
@@ -117,21 +123,32 @@ class TranscriptionService:
 
     async def get_lesson_summary(self, lesson_id: str, db: Session) -> dict[str, list]:
         if transcript := get_transcript(lesson_id, db):
-            transcript = transcript.transcription
+            transcription = transcript.transcription
 
         if summary := get_summary(lesson_id, db):
-            summary = summary.main_text
+            summary = summary.to_schema()
 
-        if feedback := get_feedback(lesson_id, db):
-            feedback = {
-                'tutor_strengths': feedback.tutor_strengths,
-                'tutor_improvements': feedback.tutor_improvements,
-                'student_strengths': feedback.student_strengths,
-                'student_improvements': feedback.student_improvements,
+        feedback = get_feedback(lesson_id, db)
+        feedback = [
+            {
+                'user_id': feedback.user_id,
+                'role': feedback.role,
+                'strengths': feedback.strengths,
+                'improvements': feedback.improvements,
             }
+            for feedback in feedback
+        ]
+
+        from devtools import debug
+
+        debug(summary)
+        debug(feedback)
+
+        chapters = await ChapterAgent().break_down_lesson(transcript)
 
         return {
-            'transcript': transcript,
-            'summary': summary,
+            'transcription': transcription,
             'feedback': feedback,
+            'chapters': chapters,
+            **summary.model_dump(),
         }

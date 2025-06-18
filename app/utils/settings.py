@@ -33,12 +33,10 @@ class Settings(BaseSettings):
     openai_api_key: str = Field(default='', alias='OPENAI_API_KEY')
     model_config = SettingsConfigDict(env_file='.env', extra='allow')
 
-
     # API Settings
     api_host: str = '0.0.0.0'
     api_port: int = 8000
     debug: bool = False
-
 
 
 @lru_cache()
