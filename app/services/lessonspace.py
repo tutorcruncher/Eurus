@@ -33,9 +33,6 @@ class LessonspaceService:
     async def _create_user_space(
         self, db, client, lesson_id, user, role, leader: bool, not_before=None
     ):
-        from devtools import debug
-
-        debug('reee')
         request = LessonSpaceRequest(
             id=lesson_id,
             user={
@@ -50,7 +47,6 @@ class LessonspaceService:
                 }
             },
         )
-        debug(request)
 
         if not_before:
             request.timeouts = {'not_before': not_before.isoformat()}
@@ -63,13 +59,8 @@ class LessonspaceService:
         resp.raise_for_status()
         data = resp.json()
 
-        debug(data)
-
-        debug(1)
         space = get_or_create_space(db, lesson_id, data['room_id'])
-        debug(2)
         create_or_update_user_space(db, user.user_id, space.id, role, leader)
-        debug(3)
 
         return UserSpace(
             user_id=user.user_id,

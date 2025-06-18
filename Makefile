@@ -10,26 +10,36 @@ install:
 install-dev:
 	uv sync --dev
 
-format:
-	ruff check app/ --fix
-	ruff format app/
+# Run development server
+dev:
+	uv run python scripts/run_dev.py
 
-lint:
-	ruff check app/ --fix
-	ruff format app/
-
+# Run tests
 test:
-	pytest
+	uv run pytest
 
-coverage:
-	pytest --cov=app --cov-report=term-missing --cov-report=html
+# Run tests with coverage
+test-cov:
+	uv run coverage run -m pytest
+	uv run coverage report
+	uv run coverage xml -o coverage.xml
+
+# Lint code
+lint:
+	uv run ruff check .
+	uv run ruff format --check .
+
+# Format code
+format:
+	uv run ruff check --fix .
+	uv run ruff format .
 
 run:
-	uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+	uv run fastapi dev app/main.py
 
-run-worker:
-	celery -A app.tasks.video_processing.celery_app worker --loglevel=info
-
+# Run Celery worker
+celery:
+	uv run celery -A app.core.celery_app worker --loglevel=info
 
 # Reset database
 reset-db:

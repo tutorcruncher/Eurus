@@ -7,7 +7,6 @@ settings = get_settings()
 
 
 def init_db() -> None:
-    print(settings.database_url)
     engine = create_engine(settings.database_url, echo=True)
     SQLModel.metadata.create_all(bind=engine)
 

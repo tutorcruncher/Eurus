@@ -15,8 +15,5 @@ class LessonSequenceService:
         self.agent = LessonSequenceAgent()
 
     def create_lesson_sequence(self, info: dict):
-        from devtools import debug
-
-        debug(info)
         lesson_sequence = self.agent.create_lesson_sequence(info)
         return lesson_sequence
