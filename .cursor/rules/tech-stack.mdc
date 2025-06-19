@@ -9,3 +9,5 @@ Framework: FastAPI
 AI Tooling: Pydantic AI
 Coding language: Python
 Testing: pytest
+Background workers: Celery
+Database: Postgres

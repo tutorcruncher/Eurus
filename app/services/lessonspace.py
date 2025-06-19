@@ -100,16 +100,9 @@ class LessonspaceService:
                     )
                 results = await asyncio.gather(*tasks)
                 user_spaces, room_ids = zip(*results)
-                from devtools import debug
-
-                debug(user_spaces)
-                debug(room_ids)
                 tutor_spaces = [us for us in user_spaces if us.role == 'tutor']
                 student_spaces = [us for us in user_spaces if us.role == 'student']
                 space_id = room_ids[0] if room_ids else None
-                from devtools import debug
-
-                debug(space_id)
                 space_response = SpaceResponse(
                     space_id=space_id,
                     lesson_id=request.lesson_id,
@@ -135,9 +128,6 @@ class LessonspaceService:
                 lesson_id=request.lesson_id,
                 error=str(e),
             )
-            from devtools import debug
-
-            debug(e)
             raise HTTPException(
                 status_code=500, detail='Internal server error: ' + str(e)
             )

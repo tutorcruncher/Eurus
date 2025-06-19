@@ -43,7 +43,8 @@ app = FastAPI(
 
 app.middleware('http')(api_key_auth_middleware)
 
-logfire.instrument_fastapi(app)
+if settings.logfire_token:
+    logfire.instrument_fastapi(app)
 
 app.include_router(router)
 

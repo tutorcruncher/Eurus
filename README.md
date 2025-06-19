@@ -61,7 +61,6 @@ uv pip install -e . --group dev
 4. Create a `.env` file in the project root:
 ```env
 APP_NAME=Eurus
-DEBUG=True
 LESSONSPACE_API_KEY=your_api_key_here
 LESSONSPACE_API_URL=https://api.thelessonspace.com/v2
 SENTRY_DSN=your_sentry_dsn_here  # Optional
