@@ -39,7 +39,11 @@ async def test_create_user_space_success(lessonspace_service, mock_user):
         'room_id': 'test-room-123',
     }
 
-    with patch('httpx.AsyncClient') as mock_client:
+    with (
+        patch('httpx.AsyncClient') as mock_client,
+        patch('app.services.lessonspace.get_or_create_space'),
+        patch('app.services.lessonspace.create_or_update_user_space'),
+    ):
         mock_response_obj = AsyncMock()
         mock_response_obj.json = Mock(return_value=mock_response)
         mock_response_obj.raise_for_status = Mock()
@@ -48,6 +52,7 @@ async def test_create_user_space_success(lessonspace_service, mock_user):
         )
 
         user_space, room_id = await lessonspace_service._create_user_space(
+            None,
             mock_client.return_value.__aenter__.return_value,
             'test-lesson-123',
             mock_user,
@@ -60,22 +65,27 @@ async def test_create_user_space_success(lessonspace_service, mock_user):
         assert user_space.role == 'tutor'
         assert user_space.space_url == mock_response['client_url']
         assert room_id == mock_response['room_id']
+        assert user_space.leader is True
 
 
 @pytest.mark.asyncio
 async def test_get_or_create_space_success(lessonspace_service, mock_space_request):
-    def user_space_factory(user, role):
+    def user_space_factory(user, role, leader):
         return UserSpace(
             user_id=user.user_id,
             name=user.name,
             role=role,
             space_url=f'https://test.com/{user.user_id}',
+            leader=leader,
         )
 
-    async def mock_create_user_space(
-        client, lesson_id, user, role, leader, not_before=None
-    ):
-        return user_space_factory(user, role), 'test-room-123'
+    async def mock_create_user_space(*args, **kwargs):
+        """Flexible signature to accept any positional args from the service."""
+        # The ``user`` parameter is always at index 3.
+        user = args[3]
+        role = args[4]
+        leader = args[5]
+        return user_space_factory(user, role, leader), 'test-room-123'
 
     with patch.object(
         lessonspace_service, '_create_user_space', side_effect=mock_create_user_space

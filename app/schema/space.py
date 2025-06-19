@@ -14,7 +14,7 @@ class LeaderUser(User):
 
 
 class SpaceRequest(BaseModel):
-    lesson_id: int | str = Field(..., description='Unique identifier for the lesson')
+    lesson_id: str = Field(..., description='Unique identifier for the lesson')
     tutors: List[LeaderUser] = Field(
         ..., description='List of tutors participating in the lesson'
     )
@@ -32,11 +32,12 @@ class UserSpace(BaseModel):
     name: str = Field(..., description='Name of the user')
     role: str = Field(..., description='Role of the user (tutor/student)')
     space_url: str = Field(..., description='Unique space URL for this user')
+    leader: bool = Field(..., description='Whether the user is a leader')
 
 
 class SpaceResponse(BaseModel):
     space_id: int | str = Field(..., description='Unique identifier for the space')
-    lesson_id: int | str = Field(
+    lesson_id: str = Field(
         ..., description='Lesson identifier this space is associated with'
     )
     tutor_spaces: List[UserSpace] = Field(

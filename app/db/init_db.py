@@ -1,15 +1,14 @@
-from sqlalchemy import create_engine
-from app.db.base_class import Base
-from app.models.transcript import Transcript
-from app.utils.settings import get_settings
-from app.utils.logging import logger
+from sqlmodel import create_engine
+from sqlmodel import SQLModel
+from ..utils.settings import get_settings
+from ..utils.logging import logger
 
 settings = get_settings()
 
 
 def init_db() -> None:
-    engine = create_engine(settings.database_url)
-    Base.metadata.create_all(bind=engine)
+    engine = create_engine(settings.database_url, echo=True)
+    SQLModel.metadata.create_all(bind=engine)
 
 
 if __name__ == '__main__':

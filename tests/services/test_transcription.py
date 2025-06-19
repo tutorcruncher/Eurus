@@ -3,6 +3,8 @@ from unittest.mock import patch, AsyncMock, Mock
 from fastapi import HTTPException
 from app.services.transcription import TranscriptionService
 from app.schema.space import TranscriptionWebhook
+from app.ai_tool.output_formats import SummaryOutput
+from app.dal.transcript import get_transcript
 
 
 @pytest.fixture
@@ -66,17 +68,44 @@ async def test_handle_webhook_success(
     webhook = TranscriptionWebhook(transcriptionUrl='http://test-url.com/transcript')
     lesson_id = 'test-lesson-123'
 
-    with patch.object(
-        transcription_service,
-        'download_transcription',
-        return_value=mock_transcription_data,
+    dummy_summary = SummaryOutput(
+        key_points='kp',
+        short_summary='s' * 60,
+        long_summary='l' * 1200,
+        recommended_focus='r' * 60,
+    )
+
+    with (
+        patch.object(
+            transcription_service,
+            'download_transcription',
+            return_value=mock_transcription_data,
+        ),
+        patch(
+            'app.services.transcription.SummaryAgent.summarize_lesson',
+            return_value=dummy_summary,
+        ),
+        patch(
+            'app.services.transcription.StudentFeedbackAgent.provide_feedback_with_str',
+            return_value=('strengths', 'improvements'),
+        ),
+        patch(
+            'app.services.transcription.TutorFeedbackAgent.provide_feedback_with_str',
+            return_value=('strengths', 'improvements'),
+        ),
+        patch(
+            'app.dal.transcript.get_user_spaces',
+            return_value=[],
+        ),
+        patch(
+            'app.models.transcript.Transcript.gather_user_transcripts',
+            return_value={},
+        ),
     ):
         await transcription_service.handle_webhook(webhook, lesson_id, db_session)
 
-        # Verify transcript was created
-        transcript = await transcription_service.get_transcript_by_id(
-            lesson_id, db_session
-        )
+        # Verify transcript was created in database via DAL helper.
+        transcript = get_transcript(lesson_id, db_session)
         assert transcript is not None
         assert transcript.lesson_id == lesson_id
 

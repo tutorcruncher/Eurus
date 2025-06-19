@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends
-from app.schema.lesson_planning import LessonPlanResponse
+from app.schema.lesson_planning import LessonPlanResponse, LessonSequenceResponse
 from app.schema.space import SpaceRequest, SpaceResponse, TranscriptionWebhook
 from app.schema.transcript import PostLessonResponse
-from app.services.lesson_planning import LessonPlanService
+from app.services.lesson_planning import LessonPlanService, LessonSequenceService
 from app.services.lessonspace import LessonspaceService
 from app.services.transcription import TranscriptionService
 from app.schema.transcript import TranscriptResponse
 from app.db.session import get_db
-from sqlalchemy.orm import Session
+from sqlmodel import Session
 
 router = APIRouter(prefix='/api/space', tags=['space'])
 
@@ -15,9 +15,10 @@ router = APIRouter(prefix='/api/space', tags=['space'])
 @router.post('/', response_model=SpaceResponse)
 async def create_space(
     request: SpaceRequest,
+    db: Session = Depends(get_db),
     service: LessonspaceService = Depends(LessonspaceService),
 ) -> SpaceResponse:
-    return await service.get_or_create_space(request)
+    return await service.get_or_create_space(request, db)
 
 
 @router.post('/webhook/transcription/{lesson_id}')
@@ -40,13 +41,13 @@ async def get_transcript(
     return await service.get_transcript_by_id(lesson_id, db)
 
 
-@router.get('/post-lesson/{lesson_id}', response_model=PostLessonResponse)
-async def post_lesson(
+@router.get('/lesson-summary/{lesson_id}', response_model=PostLessonResponse)
+async def get_lesson_summary(
     lesson_id: str,
     db: Session = Depends(get_db),
     service: TranscriptionService = Depends(TranscriptionService),
 ):
-    return await service.post_lesson(lesson_id, db)
+    return await service.get_lesson_summary(lesson_id, db)
 
 
 @router.post('/create-lesson-plan', response_model=LessonPlanResponse)
@@ -55,4 +56,14 @@ async def create_lesson_plan(
     db: Session = Depends(get_db),
     service: LessonPlanService = Depends(LessonPlanService),
 ):
-    return await service.create_lesson_plan(lesson_info)
+    lesson_plan = await service.create_lesson_plan(lesson_info)
+    return LessonPlanResponse(lesson_plan=lesson_plan)
+
+
+@router.post('/create-lesson-sequence', response_model=LessonSequenceResponse)
+async def create_lesson_sequence(
+    lesson_info: dict,
+    db: Session = Depends(get_db),
+    service: LessonSequenceService = Depends(LessonSequenceService),
+):
+    return await service.create_lesson_sequence(lesson_info)

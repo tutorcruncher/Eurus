@@ -1,17 +1,13 @@
 import logging
 from app.utils.settings import get_settings
-
-try:
-    import logfire
-except ImportError:
-    logfire = None
+import logfire
 
 
 class Logger:
     def __init__(self, name: str = 'eurus'):
         self.settings = get_settings()
         self.name = name
-        self.use_logfire = not self.settings.dev and logfire is not None
+        self.use_logfire = not self.settings.dev and self.settings.logfire_token
 
         if self.use_logfire:
             if not hasattr(logfire, '_configured'):

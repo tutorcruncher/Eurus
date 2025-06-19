@@ -1,4 +1,5 @@
 import httpx
+from app.dal.transcript import create_or_update_user_space, get_or_create_space
 from app.utils.settings import get_settings
 from app.schema.space import SpaceRequest, SpaceResponse, UserSpace
 import asyncio
@@ -7,6 +8,7 @@ from app.utils.dataclass import BaseRequest
 from dataclasses import dataclass
 from typing import Optional, Dict, Union
 from app.utils.logging import logger
+from sqlmodel import Session
 
 settings = get_settings()
 
@@ -28,7 +30,7 @@ class LessonspaceService:
         self.headers = {'Authorization': f'Organisation {self.api_key}'}
 
     async def _create_user_space(
-        self, client, lesson_id, user, role, leader, not_before=None
+        self, db, client, lesson_id, user, role, leader: bool, not_before=None
     ):
         request = LessonSpaceRequest(
             id=lesson_id,
@@ -55,22 +57,27 @@ class LessonspaceService:
         )
         resp.raise_for_status()
         data = resp.json()
-        from devtools import debug
-        debug(data)
+
+        get_or_create_space(db, lesson_id, data['room_id'])
+        create_or_update_user_space(db, user.user_id, lesson_id, role, leader)
         return UserSpace(
             user_id=user.user_id,
             name=user.name,
             role=role,
             space_url=data['client_url'],
+            leader=leader,
         ), data['room_id']
 
-    async def get_or_create_space(self, request: SpaceRequest) -> SpaceResponse:
+    async def get_or_create_space(
+        self, request: SpaceRequest, db: Optional[Session] = None
+    ) -> SpaceResponse:
         try:
             async with httpx.AsyncClient() as client:
                 tasks = []
                 for tutor in request.tutors:
                     tasks.append(
                         self._create_user_space(
+                            db,
                             client,
                             request.lesson_id,
                             tutor,
@@ -82,6 +89,7 @@ class LessonspaceService:
                 for student in request.students:
                     tasks.append(
                         self._create_user_space(
+                            db,
                             client,
                             request.lesson_id,
                             student,
@@ -112,6 +120,7 @@ class LessonspaceService:
                     if request.not_before
                     else None,
                 )
+
                 return space_response
         except Exception as e:
             logger.error(

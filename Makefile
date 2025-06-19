@@ -2,32 +2,59 @@
 
 .PHONY: install install-dev format lint test coverage run clean docs serve-docs run-worker
 
+# Install dependencies (normal packages only)
 install:
-	pip install --progress-bar off -U setuptools==57.5.0 pip
-	pip install --progress-bar off -r requirements.txt
+	uv sync
 
-install-dev: install
-	pip install --progress-bar off -r requirements.dev.txt
+# Install dependencies (including dev packages)
+install-dev:
+	uv sync --dev
 
-format:
-	ruff check app/ --fix
-	ruff format app/
+# Run development server
+dev:
+	uv run python scripts/run_dev.py
 
-lint:
-	ruff check app/ --fix
-	ruff format app/
-
+# Run tests
 test:
-	pytest
+	uv run pytest
 
-coverage:
-	pytest --cov=app --cov-report=term-missing --cov-report=html
+# Run tests with coverage
+test-cov-local:
+	uv run coverage run -m pytest --cov=app
+
+# Run tests with coverage
+test-cov:
+	uv run coverage run -m pytest
+	uv run coverage report
+	uv run coverage xml -o coverage.xml
+
+# Lint code
+lint:
+	uv run ruff check .
+	uv run ruff format --check .
+
+# Format code
+format:
+	uv run ruff check --fix .
+	uv run ruff format .
 
 run:
-	uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+	uv run fastapi dev app/main.py
 
-run-worker:
-	celery -A app.tasks.video_processing.celery_app worker --loglevel=info
+# Run Celery worker
+celery:
+	uv run celery -A app.core.celery_app worker --loglevel=info
+
+# Reset database
+reset-db:
+	psql -h localhost -U postgres -c "DROP DATABASE IF EXISTS eurus"
+	psql -h localhost -U postgres -c "CREATE DATABASE eurus"
+
+# Reset test database
+reset-db-test:
+	psql -h localhost -U postgres -c "DROP DATABASE IF EXISTS eurus_test"
+	psql -h localhost -U postgres -c "CREATE DATABASE eurus_test"
+
 
 clean:
 	rm -rf `find . -name __pycache__`
@@ -40,14 +67,6 @@ clean:
 	rm -rf htmlcov
 	rm -f .coverage
 	rm -f .coverage.*
-
-.PHONY: docker-build
-docker-build:
-	docker build -t eurus .
-
-.PHONY: docker-run
-docker-run:
-	docker run -p 8000:8000 --env-file .env eurus 
 
 .PHONY: docs
 docs:
