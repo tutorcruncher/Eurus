@@ -139,11 +139,6 @@ class TranscriptionService:
             for feedback in feedback
         ]
 
-        from devtools import debug
-
-        debug(summary)
-        debug(feedback)
-
         chapters = await ChapterAgent().break_down_lesson(transcript)
 
         return {

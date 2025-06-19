@@ -19,6 +19,10 @@ test:
 	uv run pytest
 
 # Run tests with coverage
+test-cov-local:
+	uv run coverage run -m pytest --cov=app
+
+# Run tests with coverage
 test-cov:
 	uv run coverage run -m pytest
 	uv run coverage report

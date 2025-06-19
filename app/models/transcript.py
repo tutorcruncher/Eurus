@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import JSONB
 
 from app.ai_tool.output_formats import SummaryOutput
+from app.schema.transcript import FeedbackWithUserOutput
 
 
 class Space(SQLModel, table=True):

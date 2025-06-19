@@ -58,7 +58,7 @@ class LessonspaceService:
         resp.raise_for_status()
         data = resp.json()
 
-        space = get_or_create_space(db, lesson_id, data['room_id'])
+        get_or_create_space(db, lesson_id, data['room_id'])
         create_or_update_user_space(db, user.user_id, lesson_id, role, leader)
         return UserSpace(
             user_id=user.user_id,
