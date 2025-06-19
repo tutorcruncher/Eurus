@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import JSONB
 
 from app.ai_tool.output_formats import SummaryOutput
+from app.schema.transcript import FeedbackWithUserOutput
 
 
 class Space(SQLModel, table=True):
@@ -57,8 +58,9 @@ class Transcript(SQLModel, table=True):
         for segment in self.transcription:
             user_id = segment['user']['id']
             text = segment['text']
+            name = segment['user']['name']
             # role = users_lookup[user_id].role
-            if user_id == 3626675:
+            if user_id == 3632572:
                 role = 'tutor'
             else:
                 role = 'student'
@@ -66,6 +68,7 @@ class Transcript(SQLModel, table=True):
                 user_transcripts[user_id] = {
                     'text': text,
                     'role': role,
+                    'name': name,
                 }
             else:
                 user_transcripts[user_id]['text'] += ' ' + text

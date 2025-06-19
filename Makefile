@@ -19,6 +19,10 @@ test:
 	uv run pytest
 
 # Run tests with coverage
+test-cov-local:
+	uv run coverage run -m pytest --cov=app
+
+# Run tests with coverage
 test-cov:
 	uv run coverage run -m pytest
 	uv run coverage report
@@ -45,6 +49,12 @@ celery:
 reset-db:
 	psql -h localhost -U postgres -c "DROP DATABASE IF EXISTS eurus"
 	psql -h localhost -U postgres -c "CREATE DATABASE eurus"
+
+# Reset test database
+reset-db-test:
+	psql -h localhost -U postgres -c "DROP DATABASE IF EXISTS eurus_test"
+	psql -h localhost -U postgres -c "CREATE DATABASE eurus_test"
+
 
 clean:
 	rm -rf `find . -name __pycache__`

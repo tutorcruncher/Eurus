@@ -3,8 +3,11 @@ description:
 globs: 
 alwaysApply: true
 ---
-The tech stack for this product:
+# The tech stack for this product
 
 Framework: FastAPI
 AI Tooling: Pydantic AI
 Coding language: Python
+Testing: pytest
+Background workers: Celery
+Database: Postgres

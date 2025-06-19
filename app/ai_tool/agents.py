@@ -86,19 +86,25 @@ class FeedbackAgent(BaseAgent):
 
 
 class TutorFeedbackAgent(FeedbackAgent):
-    system_prompt: str = tutor_feedback_system_prompt
     name: str = 'Tutor Feedback Agent'
     description: str = (
         'A helpful assistant that provides feedback on lessons to the tutor'
     )
 
+    def __init__(self, tutors_name: str):
+        super().__init__()
+        self.system_prompt = tutor_feedback_system_prompt(tutors_name)
+
 
 class StudentFeedbackAgent(FeedbackAgent):
-    system_prompt: str = student_feedback_system_prompt
     name: str = 'Student Feedback Agent'
     description: str = (
         'A helpful assistant that provides feedback on lessons to the student'
     )
+
+    def __init__(self, students_name: str):
+        super().__init__()
+        self.system_prompt = student_feedback_system_prompt(students_name)
 
 
 class LessonPlanAgent(BaseAgent):

@@ -43,20 +43,20 @@ class SummaryOutput(BaseModel):
     short_summary: str = Field(
         description='The short summary of the lesson in unformatted markdown',
         default='',
-        min_length=50,
-        max_length=250,
+        # min_length=50,
+        # max_length=250,
     )
     long_summary: str = Field(
         description='The long summary of the lesson in unformatted markdown',
         default='',
-        min_length=1000,
-        max_length=10000,
+        # min_length=1000,
+        # max_length=10000,
     )
     recommended_focus: str = Field(
         description='The recommended focus of the lesson in unformatted markdown',
         default='',
-        min_length=50,
-        max_length=250,
+        # min_length=50,
+        # max_length=250,
     )
 
 
