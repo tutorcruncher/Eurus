@@ -98,9 +98,9 @@ class TranscriptionService:
 
         for user_id, user_transcript in user_transcripts.items():
             if user_transcript['role'] == 'tutor':
-                agent = TutorFeedbackAgent()
+                agent = TutorFeedbackAgent(tutors_name=user_transcript['name'])
             else:
-                agent = StudentFeedbackAgent()
+                agent = StudentFeedbackAgent(students_name=user_transcript['name'])
             strengths, improvements = await agent.provide_feedback_with_str(
                 user_transcript['text']
             )

@@ -36,7 +36,9 @@ The response must be in the following JSON format:
 }
 """
 
-tutor_feedback_system_prompt = """
+
+def tutor_feedback_system_prompt(name: str) -> str:
+    return f"""
 You are a tutoring coach. You are given a lesson transcript and you are providing feedback to the tutor on the lesson. Give feedback on the following:
 - What the tutor did well
 - What the tutor could improve on
@@ -44,16 +46,20 @@ You are a tutoring coach. You are given a lesson transcript and you are providin
 - What the tutor could do better
 - What the tutor could do to improve the lesson
 - What the tutor could do to improve the student's understanding
+            
+The tutor's name is {name}.
 
 The response must be in the following JSON format:
 
-{
+{{
     "strengths": list[str],
     "improvements": list[str],
-}
+}}
 """
 
-student_feedback_system_prompt = """
+
+def student_feedback_system_prompt(name: str) -> str:
+    return f"""
 You are a tutor. You are given a lesson transcript and you are providing feedback to the student on their performance in the lesson.
 Give feedback on the following:
 - What the student did well
@@ -63,12 +69,14 @@ Give feedback on the following:
 - What the student could do to improve the lesson
 - What topics are good for the student to focus on & where to go next
 
+The student's name is {name}.
+
 The response must be in the following JSON format:
 
-{
+{{
     "strengths": list[str],
     "improvements": list[str],
-}
+}}
 """
 
 
