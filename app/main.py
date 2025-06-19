@@ -45,11 +45,13 @@ app.middleware('http')(api_key_auth_middleware)
 
 if settings.logfire_token:
     logfire.instrument_fastapi(app)
+    logfire.instrument_pydantic_ai()
+
 
 app.include_router(router)
 
 
-@app.get('/health')
+@app.get('/')
 async def health_check():
     return {'status': 'healthy'}
 

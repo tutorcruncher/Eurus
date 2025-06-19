@@ -47,6 +47,7 @@ dependencies = [
     "email-validator>=2.2.0",
     "psycopg2-binary>=2.9.10",
     "sqlmodel==0.0.24",
+    "requests>=2.31.0",
 ]
 
 [dependency-groups]

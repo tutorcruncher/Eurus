@@ -32,13 +32,13 @@ class BaseAgent:
     """Chat agent using pydantic-ai"""
 
     system_prompt: str = base_system_prompt
-    model_name: str
+    model_name: str = 'openai:gpt-4o-mini-2024-07-18'
     name: str = 'The agent'
     description: str = 'A helpful chat assistant'
     output_type = BasicOutput
 
     def __init__(self):
-        self.model_name = settings.ai_model
+        self.model_name = self.model_name or settings.ai_model
 
     def get_agent(self):
         return Agent(
@@ -115,7 +115,7 @@ class LessonPlanAgent(BaseAgent):
 
     async def create_lesson_plan(self, lesson_info: dict):
         response = await self.get_agent().run(user_prompt=lesson_info.pop('plan'))
-        return response.output
+        return response.output.lesson_plan
 
 
 class LessonSequenceAgent(BaseAgent):
