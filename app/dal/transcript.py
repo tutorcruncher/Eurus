@@ -91,7 +91,7 @@ def create_or_update_user_space(
         user_space.leader = leader
     else:
         user_space = UserSpaceModel(
-            user_id=user_id, space_id=space_id, role=role, leader=leader
+            user_id=user_id, lesson_id=lesson_id, role=role, leader=leader
         )
         db.add(user_space)
     db.commit()

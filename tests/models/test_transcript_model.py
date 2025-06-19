@@ -11,7 +11,7 @@ def _sample_transcript() -> Transcript:
             {
                 'start_time': 0.0,
                 'end_time': 1.0,
-                'user': {'id': 3626675, 'name': 'Alice'},
+                'user': {'id': 3632572, 'name': 'Alice'},
                 'breakout_id': 'main',
                 'text': 'Hello there.',
             },
@@ -25,7 +25,7 @@ def _sample_transcript() -> Transcript:
             {
                 'start_time': 2.0,
                 'end_time': 3.0,
-                'user': {'id': 3626675, 'name': 'Alice'},
+                'user': {'id': 3632572, 'name': 'Alice'},
                 'breakout_id': 'main',
                 'text': 'How are you?',
             },
@@ -45,15 +45,15 @@ def test_transcript_helper_methods():
     assert concatenated.count('\n') == 2
 
     # 2. ``get_user_transcript`` filters by ``user_id``.
-    alice_text = transcript.get_user_transcript(3626675)
+    alice_text = transcript.get_user_transcript(3632572)
     assert 'Hello there.' in alice_text and 'How are you?' in alice_text
     # Bob's line must not be in Alice's transcript.
     assert 'Hi Alice!' not in alice_text
 
     # 3. ``gather_user_transcripts`` aggregates and labels by role.
     user_lookup = {
-        3626675: UserSpaceModel(
-            user_id=3626675, role='tutor', leader=True, lesson_id='lesson-xyz'
+        3632572: UserSpaceModel(
+            user_id=3632572, role='tutor', leader=True, lesson_id='lesson-xyz'
         ),
         123: UserSpaceModel(
             user_id=123, role='student', leader=False, lesson_id='lesson-xyz'
@@ -62,11 +62,11 @@ def test_transcript_helper_methods():
     user_transcripts = transcript.gather_user_transcripts(user_lookup)
 
     # Two distinct users should be present.
-    assert set(user_transcripts.keys()) == {3626675, 123}
+    assert set(user_transcripts.keys()) == {3632572, 123}
 
-    # The tutor (3626675) should have combined text from both of their segments.
-    assert user_transcripts[3626675]['role'] == 'tutor'
-    assert 'How are you?' in user_transcripts[3626675]['text']
+    # The tutor (3632572) should have combined text from both of their segments.
+    assert user_transcripts[3632572]['role'] == 'tutor'
+    assert 'How are you?' in user_transcripts[3632572]['text']
 
     # The student (123) should be labelled as student and only have their own line.
     assert user_transcripts[123]['role'] == 'student'
